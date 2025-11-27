@@ -1,6 +1,7 @@
 import Koa from "koa";
 import Router from "@koa/router";
 import bodyParser from "koa-bodyparser";
+import authRouter from './routes/authRoutes';
 
 const app = new Koa();
 const router = new Router();
@@ -12,6 +13,9 @@ router.get("/", (ctx) => {
 app.use(bodyParser());
 app.use(router.routes());
 app.use(router.allowedMethods());
+
+app.use(authRouter.routes());
+app.use(authRouter.allowedMethods());
 
 const PORT = process.env.PORT || 3000;
 
