@@ -20,7 +20,7 @@ export default class UserPrismaRepository {
     async create(data: {
         name: string;
         lastname?: string | null;
-        age: number;
+        age?: number | null;
         email: string;
         password: string;
         }) {
