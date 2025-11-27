@@ -3,6 +3,7 @@ import Router from "@koa/router";
 import bodyParser from "koa-bodyparser";
 import authRouter from './routes/authRoutes';
 import userRouter from "./routes/userRoutes";
+import projectsRouter from "./routes/projectRoutes";
 
 const app = new Koa();
 const router = new Router();
@@ -20,6 +21,9 @@ app.use(authRouter.allowedMethods());
 
 app.use(userRouter.routes());
 app.use(userRouter.allowedMethods());
+
+app.use(projectsRouter.routes());
+app.use(projectsRouter.allowedMethods());
 
 const PORT = process.env.PORT || 3000;
 
