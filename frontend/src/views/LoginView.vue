@@ -3,26 +3,57 @@
     <div class="w-full max-w-sm p-6 bg-white rounded-xl shadow">
       <h1 class="text-2xl font-bold mb-4 text-center">Login</h1>
 
-      <form class="space-y-4">
+      <form @submit.prevent="handleLogin" class="space-y-4">
         <input
+          v-model="email"
           type="email"
           placeholder="Email"
           class="w-full px-4 py-2 border rounded-lg"
+          required
         />
 
         <input
+          v-model="password"
           type="password"
           placeholder="Password"
           class="w-full px-4 py-2 border rounded-lg"
+          required
         />
 
         <button
           type="submit"
           class="w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition cursor-pointer"
         >
-          Submit
+          Login
         </button>
       </form>
     </div>
   </div>
 </template>
+
+<script setup lang="ts">
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { login } from '../services/authService'
+import { useSessionStore } from '../stores/session'
+
+const email = ref('')
+const password = ref('')
+const router = useRouter()
+const sessionStore = useSessionStore()
+
+async function handleLogin() {
+  try {
+    const response = await login({
+      email: email.value,
+      password: password.value
+    })
+
+    sessionStore.setSession(response)
+
+    router.push('/app/dashboard')
+  } catch (error: any) {
+    alert(error?.error || "Login failed")
+  }
+}
+</script>
