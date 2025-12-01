@@ -1,5 +1,5 @@
 <template>
-  <div class="flex items-center justify-center min-h-screen bg-gray-100">
+  <div class="flex justify-center bg-gray-50 py-10">
     <div class="w-full max-w-md p-6 bg-white rounded-xl shadow">
       <h1 class="text-3xl font-bold mb-6 text-center">Create your account</h1>
 
