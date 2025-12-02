@@ -21,7 +21,10 @@ const routes = [
     path: '/app',
     component: AppLayout,
     meta: { requiresAuth: true },
-    children: [{ path: 'dashboard', name: 'dashboard', component: DashboardView }]
+    children: [
+      { path: 'dashboard', name: 'dashboard', component: DashboardView },
+      { path: 'projects/:id', name: 'project', component: () => import('../views/ProjectDetailView.vue')}
+    ]
   }
 ]
 

@@ -13,7 +13,7 @@
       />
       <button
         type="submit"
-        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition cursor-pointer"
       >
         Add
       </button>
@@ -32,6 +32,7 @@
       <li
         v-for="project in projects"
         :key="project.id"
+        @click="handleProjectDetail(project.id)"
         class="p-4 bg-white rounded-lg shadow border cursor-pointer hover:bg-gray-50"
       >
         <h2 class="text-lg font-semibold">{{ project.title }}</h2>
@@ -45,12 +46,14 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { getProjects, createProject } from '../services/projectService'
 import type { IProject } from '../types/types'
 
 const loading = ref(true)
 const projects = ref<IProject[]>([])
 const newProjectTitle = ref("")
+const router = useRouter()
 
 // Load projects on enter
 onMounted(async () => {
@@ -74,6 +77,11 @@ async function handleCreateProject() {
 }
 
 function formatDate(iso: string): string {
-  return new Date(iso).toLocaleString()
+  return new Date(iso).toLocaleString("en-UK", { dateStyle: "short"})
 }
+
+function handleProjectDetail(id: string) {
+  router.push(`/app/projects/${id}`)
+}
+
 </script>
