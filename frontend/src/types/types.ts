@@ -24,3 +24,11 @@ export interface IUserRegisterResponse{
     age?:number,
     email:string
 }
+
+export interface IProject {
+  id: string
+  title: string
+  userId: string
+  createdAt: string
+  updatedAt: string
+}
