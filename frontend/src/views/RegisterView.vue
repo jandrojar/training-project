@@ -3,16 +3,19 @@
     <div class="w-full max-w-md p-6 bg-white rounded-xl shadow">
       <h1 class="text-3xl font-bold mb-6 text-center">Create your account</h1>
 
-      <form class="space-y-4">
+      <form @submit.prevent="handleRegister"  class="space-y-4">
         <!-- First name -->
         <input 
+          v-model="user.name"
           type="text"
           placeholder="First name"
           class="w-full px-4 py-2 border rounded-lg"
+          required
         />
 
         <!-- Last name -->
-        <input 
+        <input
+          v-model="user.lastname"
           type="text"
           placeholder="Last name (optional)"
           class="w-full px-4 py-2 border rounded-lg"
@@ -20,6 +23,7 @@
 
         <!-- Age -->
         <input
+          v-model.number="user.age"
           type="number"
           placeholder="Age (optional)"
           class="w-full px-4 py-2 border rounded-lg"
@@ -27,16 +31,20 @@
 
         <!-- Email -->
         <input 
+          v-model="user.email"
           type="email"
           placeholder="Email"
           class="w-full px-4 py-2 border rounded-lg"
+          required
         />
 
         <!-- Password -->
         <input 
+          v-model="user.password"
           type="password"
           placeholder="Password"
           class="w-full px-4 py-2 border rounded-lg"
+          required
         />
 
         <!-- Submit -->
@@ -57,3 +65,29 @@
     </div>
   </div>
 </template>
+<script setup lang="ts">
+import { reactive } from 'vue';
+import type { IUserRegister } from '../types/types';
+import { useRouter } from 'vue-router';
+import {register} from '../services/authService'
+
+const router = useRouter();
+const user = reactive<IUserRegister>({
+  name: '',
+  lastname: '',
+  age: undefined,
+  email: '',
+  password: ''
+});
+
+async function handleRegister() {
+  try{
+  await register(user)
+  router.push('/login')
+} catch (error: any) {
+    alert(error?.error || "Register failed")
+}
+}
+
+
+</script>

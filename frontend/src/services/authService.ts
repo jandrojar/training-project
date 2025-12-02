@@ -21,10 +21,11 @@ export async function register(data: IUserRegister): Promise<IUserRegisterRespon
     }
 }
 
-export async function logout(sessionId: string):Promise<void>{
-    try{
-        await api.post('/auth/logout', {sessionId});
-    }catch(err:any){
-        throw err.response?.data || 'An unknown error ocurred.';
-    }
+export async function logout(): Promise<{ success: boolean }> {
+  try {
+    const res = await api.post('/auth/logout')
+    return res.data
+  } catch (err: any) {
+    throw err.response?.data || "Logout failed"
+  }
 }

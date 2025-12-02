@@ -5,7 +5,7 @@
 
       <form @submit.prevent="handleLogin" class="space-y-4">
         <input
-          v-model="email"
+          v-model="user.email"
           type="email"
           placeholder="Email"
           class="w-full px-4 py-2 border rounded-lg"
@@ -13,7 +13,7 @@
         />
 
         <input
-          v-model="password"
+          v-model="user.password"
           type="password"
           placeholder="Password"
           class="w-full px-4 py-2 border rounded-lg"
@@ -32,22 +32,23 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { login } from '../services/authService'
 import { useSessionStore } from '../stores/session'
+import type { IUserLogin } from '../types/types'
 
-const email = ref('')
-const password = ref('')
+const user = reactive<IUserLogin>({
+  email: '',
+  password: ''
+})
+
 const router = useRouter()
 const sessionStore = useSessionStore()
 
 async function handleLogin() {
   try {
-    const response = await login({
-      email: email.value,
-      password: password.value
-    })
+    const response = await login(user)
 
     sessionStore.setSession(response)
 
