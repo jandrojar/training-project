@@ -4,9 +4,17 @@ import bodyParser from "koa-bodyparser";
 import authRouter from './routes/authRoutes';
 import userRouter from "./routes/userRoutes";
 import projectsRouter from "./routes/projectRoutes";
+import cors from '@koa/cors';
 
 const app = new Koa();
 const router = new Router();
+
+app.use(cors({
+  origin: "http://localhost:5173",
+  credentials: true,
+  allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowHeaders: ["Content-Type", "Authorization"]
+}));
 
 router.get("/", (ctx) => {
   ctx.body = "API is running";
