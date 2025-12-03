@@ -33,7 +33,7 @@ const router = createRouter({
   routes,
 })
 
-router.beforeEach((to, from, next) => {
+router.beforeEach((to, _from, next) => {
   const session = useSessionStore()
 
   // 1. Si la ruta requiere auth y NO estás logueado → redirige
