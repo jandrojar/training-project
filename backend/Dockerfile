@@ -7,14 +7,17 @@ WORKDIR /app
 # Copy dependency manifests first (to leverage Docker cache)
 COPY package*.json ./
 
-# Install only production dependencies
-RUN npm install --only=production
+# Install dependencies (includes dev deps so Prisma CLI is available to generate)
+RUN npm install
 
 # Copy the full application code
 COPY . .
 
 # Set environment variables for production
 ENV NODE_ENV=production
+
+# Generate Prisma Client based on the current schema
+RUN npx prisma generate
 
 # Expose the port used by the Koa API
 EXPOSE 3000
