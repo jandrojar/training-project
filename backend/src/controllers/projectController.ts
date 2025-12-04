@@ -3,7 +3,10 @@ import {
   createProject,
   getProjectsForUser,
   getProjectForUser,
+  updateProjectForUser,
+  deleteProjectForUser
 } from "../services/projectService";
+import { ProjectPayload } from "../types/Project";
 
 export async function createProjectHandler(ctx: Context) {
   const userId = ctx.state.userId; // authMiddleware lo pone
@@ -66,6 +69,79 @@ export async function getProjectHandler(ctx: Context) {
   } catch (err) {
     if (err instanceof Error) {
       ctx.status = 404;
+      ctx.body = { error: err.message };
+      return;
+    }
+
+    ctx.status = 500;
+    ctx.body = { error: "internal-error" };
+  }
+}
+
+export async function updateProjectHandler(ctx: Context) {
+  const userId = ctx.state.userId;
+  const { id } = ctx.params;
+
+  try {
+    const payload = ctx.request.body as Partial<ProjectPayload>;
+
+    if (payload.title !== undefined) {
+      if (typeof payload.title !== "string") {
+        ctx.status = 400;
+        ctx.body = { error: "Title must be a string" };
+        return;
+      }
+      const cleanTitle = payload.title.trim();
+      if (!cleanTitle) {
+        ctx.status = 400;
+        ctx.body = { error: "Title cannot be empty" };
+        return;
+      }
+      payload.title = cleanTitle;
+    }
+
+    if (payload.description !== undefined && typeof payload.description === "string") {
+      payload.description = payload.description.trim();
+    }
+
+    const updatedProject = await updateProjectForUser(
+      id,
+      userId,
+      payload
+    );
+
+    if (!updatedProject) {
+      ctx.status = 404;
+      ctx.body = { error: "Project not found" };
+      return;
+    }
+
+    ctx.status = 200;
+    ctx.body = updatedProject;
+  } catch (err) {
+    if (err instanceof Error) {
+      ctx.status = 400;
+      ctx.body = { error: err.message };
+      return;
+    }
+
+    ctx.status = 500;
+    ctx.body = { error: "internal-error" };
+  }
+}
+
+export async function deleteProjectHandler(ctx: Context) {
+  const userId = ctx.state.userId;
+  const { id } = ctx.params;
+
+  try {
+    await deleteProjectForUser(id, userId);
+    ctx.status = 200;
+    ctx.body = { success: true };
+
+  } catch (err) {
+    if (err instanceof Error) {
+      ctx.status = 400;
       ctx.body = { error: err.message };
       return;
     }
