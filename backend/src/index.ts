@@ -8,9 +8,10 @@ import cors from '@koa/cors';
 
 const app = new Koa();
 const router = new Router();
+const allowedOrigin = process.env.CORS_ORIGIN || "*";
 
 app.use(cors({
-  origin: "http://localhost:5173",
+  origin: allowedOrigin,
   credentials: true,
   allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowHeaders: ["Content-Type", "Authorization"]

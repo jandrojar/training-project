@@ -2,9 +2,9 @@ import axios from 'axios'
 import { useSessionStore } from '../stores/session'
 
 export const api = axios.create({
-  baseURL: 'http://localhost:3000', // backend url
-  withCredentials: true,            
-  timeout: 5000                     
+  baseURL: import.meta.env.VITE_API_URL, // dev: http://localhost:3000, prod: /api via nginx
+  withCredentials: true,
+  timeout: 5000
 })
 
 // Response interceptor
