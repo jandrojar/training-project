@@ -4,9 +4,10 @@ import {
   getProjectsForUser,
   getProjectForUser,
   updateProjectForUser,
-  deleteProjectForUser
+  deleteProjectForUser,
+  getFilteredProjects
 } from "../services/projectService";
-import { ProjectPayload } from "../types/Project";
+import { ProjectPayload, ProjectStatus, ProjectPriority } from "../types/Project";
 
 export async function createProjectHandler(ctx: Context) {
   const userId = ctx.state.userId; // authMiddleware lo pone
@@ -139,6 +140,32 @@ export async function deleteProjectHandler(ctx: Context) {
     ctx.status = 200;
     ctx.body = { success: true };
 
+  } catch (err) {
+    if (err instanceof Error) {
+      ctx.status = 400;
+      ctx.body = { error: err.message };
+      return;
+    }
+
+    ctx.status = 500;
+    ctx.body = { error: "internal-error" };
+  }
+}
+
+export async function getFilteredProjectsHandler(ctx: Context) {
+  const userId = ctx.state.userId;
+
+  const { search, status, priority } = ctx.query;
+
+  try {
+    const projects = await getFilteredProjects(userId, {
+      search: search as string,
+      status: status as ProjectStatus,
+      priority: priority as ProjectPriority,
+    });
+
+    ctx.status = 200;
+    ctx.body = projects;
   } catch (err) {
     if (err instanceof Error) {
       ctx.status = 400;

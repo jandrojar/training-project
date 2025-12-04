@@ -1,5 +1,5 @@
 import ProjectRepository from "../repositories/ProjectRepository";
-import { ProjectPayload, ProjectDTO } from "../types/Project";
+import { ProjectPayload, ProjectDTO, ProjectPriority, ProjectStatus } from "../types/Project";
 
 const projectRepo = new ProjectRepository();
 
@@ -76,4 +76,34 @@ export async function deleteProjectForUser(projectId: string, userId: string): P
   }
 
   return;
+}
+
+export async function getFilteredProjects(userId: string, query: {
+  search?: string;
+  status?: ProjectStatus;
+  priority?: ProjectPriority;
+}): Promise<ProjectDTO[]> {
+  
+  if (query.status && !["PLANNED", "IN_PROGRESS", "COMPLETED", "ON_HOLD"].includes(query.status)) {
+    throw new Error("Invalid status");
+  }
+
+  if (query.priority && !["LOW", "MEDIUM", "HIGH"].includes(query.priority)) {
+    throw new Error("Invalid priority");
+  }
+
+  const projects = await projectRepo.getFilteredProjects(userId, query);
+
+  return projects.map((project) => ({
+    id: project.id,
+    title: project.title,
+    description: project.description ?? undefined,
+    status: project.status,
+    priority: project.priority,
+    tags: project.tags,
+    deadline: project.deadline ?? undefined,
+    userId: project.userId,
+    createdAt: project.createdAt,
+    updatedAt: project.updatedAt,
+  }));
 }

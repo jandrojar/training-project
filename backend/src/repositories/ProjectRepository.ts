@@ -1,5 +1,5 @@
 import prisma from "../services/prisma";
-import { ProjectPayload } from "../types/Project";
+import { ProjectPayload, ProjectStatus, ProjectPriority } from "../types/Project";
 
 
 export default class PrismaProjectRepository {
@@ -44,4 +44,24 @@ export default class PrismaProjectRepository {
 
     return deleteResult.count > 0;
   }
+
+  async getFilteredProjects(userId: string, filters: {
+  search?: string;
+  status?: ProjectStatus;
+  priority?: ProjectPriority;
+}) {
+  return prisma.project.findMany({
+    where: {
+      userId,
+      title: filters.search
+        ? { contains: filters.search, mode: "insensitive" }
+        : undefined,
+      status: filters.status || undefined,
+      priority: filters.priority || undefined,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+}
 }
