@@ -3,9 +3,14 @@ import { ProjectPayload, ProjectStatus, ProjectPriority } from "../types/Project
 
 
 export default class PrismaProjectRepository {
-  async createProject(data: { title: string; userId: string }) {
+  async createProject(data: { project: ProjectPayload; userId: string }) {
+    const { project, userId } = data;
+
     return prisma.project.create({
-      data,
+      data: {
+        ...project,   
+        userId,
+        },
     });
   }
 

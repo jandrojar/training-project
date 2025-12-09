@@ -1,7 +1,7 @@
 export interface TaskPayload {
     title: string;
     description?: string;
-    deadline?: Date;
+    deadline?: string | Date;
 }
 
 export interface TaskDTO {
