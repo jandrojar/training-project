@@ -75,6 +75,12 @@ docker compose up
 - Database auto-starts (no `.env` needed)
 - All services: http://localhost:5173 (frontend)
 
+**First-time setup (after the very first `docker compose up`)**: generate the Prisma client and apply dev migrations inside the backend container:
+```bash
+docker compose exec backend npx prisma migrate dev
+docker compose exec backend npx prisma generate
+```
+
 #### Without Docker
 Requires PostgreSQL running locally.
 
