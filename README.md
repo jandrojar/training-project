@@ -24,6 +24,7 @@ Access:
 - **Frontend**: http://localhost:5173
 - **Backend API**: http://localhost:3000
 - **Database**: localhost:5433 (PostgreSQL)
+- **First run**: once containers are up, apply migrations with `docker compose exec backend npx prisma migrate dev` and generate Prisma client with `docker compose exec backend npx prisma generate`.
 
 Stop:
 ```bash

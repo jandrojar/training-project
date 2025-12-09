@@ -1,19 +1,23 @@
 import { Context } from "koa";
-import  {
+import {
   createTask,
   getTasksForProject,
+  getTaskForUser,
   updateTaskForUser,
   deleteTaskForUser,
-  getTaskForUser,
   updateTaskDoneForUser
 } from "../services/taskService";
 import { TaskPayload } from "../types/Task";
 
+/**
+ * Create task
+ */
 export async function createTaskHandler(ctx: Context) {
-  const userId = ctx.state.userId; // authMiddleware coloca el userId
+  const userId = ctx.state.userId;
   const { projectId } = ctx.params;
   const taskData = ctx.request.body as TaskPayload;
 
+  // Controller validation: shape
   if (!taskData?.title) {
     ctx.status = 400;
     ctx.body = { error: "Title is required" };
@@ -38,39 +42,24 @@ export async function createTaskHandler(ctx: Context) {
       ? taskData.description.trim()
       : taskData.description;
 
-  let parsedDeadline: Date | undefined;
-  if (taskData.deadline !== undefined) {
-    const parsed = new Date(taskData.deadline);
-    if (isNaN(parsed.getTime())) {
-      ctx.status = 400;
-      ctx.body = { error: "Invalid deadline date" };
-      return;
-    }
-    parsedDeadline = parsed;
-  }
-
   try {
     const task = await createTask(projectId, userId, {
       ...taskData,
       title: cleanTitle,
       description: cleanDescription,
-      deadline: parsedDeadline,
     });
 
     ctx.status = 201;
     ctx.body = task;
   } catch (err) {
-    if (err instanceof Error) {
-      ctx.status = 400;
-      ctx.body = { error: err.message };
-      return;
-    }
-
-    ctx.status = 500;
-    ctx.body = { error: "internal-error" };
+    ctx.status = 400;
+    ctx.body = { error: (err as Error).message };
   }
 }
 
+/**
+ * Get all tasks for a project
+ */
 export async function getTasksHandler(ctx: Context) {
   const userId = ctx.state.userId;
   const { projectId } = ctx.params;
@@ -80,17 +69,14 @@ export async function getTasksHandler(ctx: Context) {
     ctx.status = 200;
     ctx.body = tasks;
   } catch (err) {
-    if (err instanceof Error) {
-      ctx.status = 404;
-      ctx.body = { error: err.message };
-      return;
-    }
-
-    ctx.status = 500;
-    ctx.body = { error: "internal-error" };
+    ctx.status = 404;
+    ctx.body = { error: (err as Error).message };
   }
 }
 
+/**
+ * Get single task
+ */
 export async function getTaskHandler(ctx: Context) {
   const userId = ctx.state.userId;
   const { projectId, taskId } = ctx.params;
@@ -100,17 +86,14 @@ export async function getTaskHandler(ctx: Context) {
     ctx.status = 200;
     ctx.body = task;
   } catch (err) {
-    if (err instanceof Error) {
-      ctx.status = 404;
-      ctx.body = { error: err.message };
-      return;
-    }
-
-    ctx.status = 500;
-    ctx.body = { error: "internal-error" };
+    ctx.status = 404;
+    ctx.body = { error: (err as Error).message };
   }
 }
 
+/**
+ * Update task
+ */
 export async function updateTaskHandler(ctx: Context) {
   const userId = ctx.state.userId;
   const { projectId, taskId } = ctx.params;
@@ -123,28 +106,21 @@ export async function updateTaskHandler(ctx: Context) {
       return;
     }
 
-    const cleanTitle = payload.title.trim();
-    if (!cleanTitle) {
+    const clean = payload.title.trim();
+    if (!clean) {
       ctx.status = 400;
       ctx.body = { error: "Title cannot be empty" };
       return;
     }
 
-    payload.title = cleanTitle;
+    payload.title = clean;
   }
 
-  if (payload.description !== undefined && typeof payload.description === "string") {
+  if (
+    payload.description !== undefined &&
+    typeof payload.description === "string"
+  ) {
     payload.description = payload.description.trim();
-  }
-
-  if (payload.deadline !== undefined) {
-    const parsed = new Date(payload.deadline);
-    if (isNaN(parsed.getTime())) {
-      ctx.status = 400;
-      ctx.body = { error: "Invalid deadline date" };
-      return;
-    }
-    payload.deadline = parsed;
   }
 
   try {
@@ -152,17 +128,14 @@ export async function updateTaskHandler(ctx: Context) {
     ctx.status = 200;
     ctx.body = task;
   } catch (err) {
-    if (err instanceof Error) {
-      ctx.status = 400;
-      ctx.body = { error: err.message };
-      return;
-    }
-
-    ctx.status = 500;
-    ctx.body = { error: "internal-error" };
+    ctx.status = 400;
+    ctx.body = { error: (err as Error).message };
   }
 }
 
+/**
+ * Delete task
+ */
 export async function deleteTaskHandler(ctx: Context) {
   const userId = ctx.state.userId;
   const { projectId, taskId } = ctx.params;
@@ -172,23 +145,20 @@ export async function deleteTaskHandler(ctx: Context) {
     ctx.status = 200;
     ctx.body = { success: true };
   } catch (err) {
-    if (err instanceof Error) {
-      ctx.status = 400;
-      ctx.body = { error: err.message };
-      return;
-    }
-
-    ctx.status = 500;
-    ctx.body = { error: "internal-error" };
+    ctx.status = 400;
+    ctx.body = { error: (err as Error).message };
   }
 }
 
+/**
+ * Update done
+ */
 export async function updateTaskDoneHandler(ctx: Context) {
   const userId = ctx.state.userId;
   const { projectId, taskId } = ctx.params;
   const { done } = ctx.request.body as { done?: unknown };
 
-  if (done === undefined || typeof done !== "boolean") {
+  if (typeof done !== "boolean") {
     ctx.status = 400;
     ctx.body = { error: "done must be a boolean" };
     return;
@@ -199,13 +169,7 @@ export async function updateTaskDoneHandler(ctx: Context) {
     ctx.status = 200;
     ctx.body = task;
   } catch (err) {
-    if (err instanceof Error) {
-      ctx.status = 400;
-      ctx.body = { error: err.message };
-      return;
-    }
-
-    ctx.status = 500;
-    ctx.body = { error: "internal-error" };
+    ctx.status = 400;
+    ctx.body = { error: (err as Error).message };
   }
 }

@@ -5,44 +5,65 @@ import {
   getProjectForUser,
   updateProjectForUser,
   deleteProjectForUser,
-  getFilteredProjects
+  getFilteredProjects,
 } from "../services/projectService";
-import { ProjectPayload, ProjectStatus, ProjectPriority } from "../types/Project";
+
+import {
+  ProjectPayload,
+  ProjectStatus,
+  ProjectPriority,
+} from "../types/Project";
+
 
 export async function createProjectHandler(ctx: Context) {
-  const userId = ctx.state.userId; // authMiddleware lo pone
-  const { title } = ctx.request.body as { title: string };
+  const userId = ctx.state.userId;
+  const body = ctx.request.body as Partial<ProjectPayload>;
 
-  if (!title) {
+  if (!body.title) {
     ctx.status = 400;
     ctx.body = { error: "Title is required" };
     return;
   }
 
-  const cleanTitle = title.trim();
+  if (typeof body.title !== "string") {
+    ctx.status = 400;
+    ctx.body = { error: "Title must be a string" };
+    return;
+  }
 
+  const cleanTitle = body.title.trim();
   if (!cleanTitle) {
     ctx.status = 400;
     ctx.body = { error: "Title cannot be empty" };
     return;
   }
 
+  if (body.tags !== undefined && !Array.isArray(body.tags)) {
+    ctx.status = 400;
+    ctx.body = { error: "Tags must be an array" };
+    return;
+  }
+
+  const cleanDescription =
+    typeof body.description === "string"
+      ? body.description.trim()
+      : body.description;
+
   try {
-    const project = await createProject(userId, cleanTitle);
+    const project = await createProject(userId, {
+      ...body,
+      title: cleanTitle,
+      description: cleanDescription,
+    });
+
     ctx.status = 201;
     ctx.body = project;
-    return;
   } catch (err) {
-    if (err instanceof Error) {
-      ctx.status = 400;
-      ctx.body = { error: err.message };
-      return;
-    }
-
-    ctx.status = 500;
-    ctx.body = { error: "internal-error" };
+    ctx.status = 400;
+    ctx.body = { error: (err as Error).message };
   }
 }
+
 
 export async function getProjectsHandler(ctx: Context) {
   const userId = ctx.state.userId;
@@ -51,6 +72,7 @@ export async function getProjectsHandler(ctx: Context) {
   ctx.status = 200;
   ctx.body = projects;
 }
+
 
 export async function getProjectHandler(ctx: Context) {
   const userId = ctx.state.userId;
@@ -68,66 +90,53 @@ export async function getProjectHandler(ctx: Context) {
     ctx.status = 200;
     ctx.body = project;
   } catch (err) {
-    if (err instanceof Error) {
-      ctx.status = 404;
-      ctx.body = { error: err.message };
-      return;
-    }
-
-    ctx.status = 500;
-    ctx.body = { error: "internal-error" };
+    ctx.status = 404;
+    ctx.body = { error: (err as Error).message };
   }
 }
+
 
 export async function updateProjectHandler(ctx: Context) {
   const userId = ctx.state.userId;
   const { id } = ctx.params;
 
-  try {
-    const payload = ctx.request.body as Partial<ProjectPayload>;
+  const payload = ctx.request.body as Partial<ProjectPayload>;
 
-    if (payload.title !== undefined) {
-      if (typeof payload.title !== "string") {
-        ctx.status = 400;
-        ctx.body = { error: "Title must be a string" };
-        return;
-      }
-      const cleanTitle = payload.title.trim();
-      if (!cleanTitle) {
-        ctx.status = 400;
-        ctx.body = { error: "Title cannot be empty" };
-        return;
-      }
-      payload.title = cleanTitle;
-    }
-
-    if (payload.description !== undefined && typeof payload.description === "string") {
-      payload.description = payload.description.trim();
-    }
-
-    const updatedProject = await updateProjectForUser(
-      id,
-      userId,
-      payload
-    );
-
-    if (!updatedProject) {
-      ctx.status = 404;
-      ctx.body = { error: "Project not found" };
+  if (payload.title !== undefined) {
+    if (typeof payload.title !== "string") {
+      ctx.status = 400;
+      ctx.body = { error: "Title must be a string" };
       return;
     }
+
+    const cleanTitle = payload.title.trim();
+    if (!cleanTitle) {
+      ctx.status = 400;
+      ctx.body = { error: "Title cannot be empty" };
+      return;
+    }
+
+    payload.title = cleanTitle;
+  }
+
+  if (payload.description !== undefined && typeof payload.description === "string") {
+    payload.description = payload.description.trim();
+  }
+
+  if (payload.tags !== undefined && !Array.isArray(payload.tags)) {
+    ctx.status = 400;
+    ctx.body = { error: "Tags must be an array" };
+    return;
+  }
+
+  try {
+    const updated = await updateProjectForUser(id, userId, payload);
 
     ctx.status = 200;
-    ctx.body = updatedProject;
+    ctx.body = updated;
   } catch (err) {
-    if (err instanceof Error) {
-      ctx.status = 400;
-      ctx.body = { error: err.message };
-      return;
-    }
-
-    ctx.status = 500;
-    ctx.body = { error: "internal-error" };
+    ctx.status = 400;
+    ctx.body = { error: (err as Error).message };
   }
 }
 
@@ -139,22 +148,16 @@ export async function deleteProjectHandler(ctx: Context) {
     await deleteProjectForUser(id, userId);
     ctx.status = 200;
     ctx.body = { success: true };
-
   } catch (err) {
-    if (err instanceof Error) {
-      ctx.status = 400;
-      ctx.body = { error: err.message };
-      return;
-    }
-
-    ctx.status = 500;
-    ctx.body = { error: "internal-error" };
+    ctx.status = 400;
+    ctx.body = { error: (err as Error).message };
   }
 }
 
+
+
 export async function getFilteredProjectsHandler(ctx: Context) {
   const userId = ctx.state.userId;
-
   const { search, status, priority } = ctx.query;
 
   try {
@@ -167,13 +170,7 @@ export async function getFilteredProjectsHandler(ctx: Context) {
     ctx.status = 200;
     ctx.body = projects;
   } catch (err) {
-    if (err instanceof Error) {
-      ctx.status = 400;
-      ctx.body = { error: err.message };
-      return;
-    }
-
-    ctx.status = 500;
-    ctx.body = { error: "internal-error" };
+    ctx.status = 400;
+    ctx.body = { error: (err as Error).message };
   }
 }
