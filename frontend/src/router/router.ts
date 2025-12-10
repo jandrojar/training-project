@@ -36,17 +36,17 @@ const router = createRouter({
 router.beforeEach((to, _from, next) => {
   const session = useSessionStore()
 
-  // 1. Si la ruta requiere auth y NO estás logueado → redirige
+  // If the user is not logged in and tries to access a protected route → redirect to login page
   if (to.meta.requiresAuth && !session.isLoggedIn) {
     return next('/login')
   }
 
-  // 2. Si estás logueado e intentas ir a login/register → manda al dashboard
+  // If the user is logged in and tries to go to login/register → redirect to dashboard
   if ((to.path === '/login' || to.path === '/register') && session.isLoggedIn) {
     return next('/app/dashboard')
   }
 
-  // 3. En cualquier otro caso continúa
+  // Otherwise, allow access
   next()
 })
 
