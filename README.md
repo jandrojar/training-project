@@ -20,6 +20,8 @@ No `.env` files needed—everything is configured:
 docker compose up --build
 ```
 
+**Note (first time):** If this is your first time bringing up the development containers, run `docker compose up --build` to force image builds and avoid issues with dependencies or changes in Dockerfiles.
+
 Access:
 - **Frontend**: http://localhost:5173
 - **Backend API**: http://localhost:3000
@@ -75,6 +77,8 @@ docker compose up
 - Hot reload enabled via volume mounts
 - Database auto-starts (no `.env` needed)
 - All services: http://localhost:5173 (frontend)
+
+**Note (first time):** The first time, run `docker compose up --build` to build the images before bringing up the containers.
 
 **First-time setup (after the very first `docker compose up`)**: generate the Prisma client and apply dev migrations inside the backend container:
 ```bash
