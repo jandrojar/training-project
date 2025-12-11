@@ -17,7 +17,7 @@ Full-stack application with Node.js + TypeScript + Koa + Prisma + PostgreSQL on 
 No `.env` files needed—everything is configured:
 
 ```bash
-docker compose up
+docker compose up --build
 ```
 
 Access:
