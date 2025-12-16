@@ -1,5 +1,6 @@
-#!/bin/sh
-set -euo pipefail
+﻿#!/bin/sh
+sed -i 's/\r$//' "$0"
+set -eu
 
 echo "Ensuring frontend dependencies are installed..."
 if [ ! -d node_modules ]; then

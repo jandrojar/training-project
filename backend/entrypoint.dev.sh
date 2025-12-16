@@ -1,5 +1,6 @@
-#!/bin/sh
-set -euo pipefail
+﻿#!/bin/sh
+sed -i 's/\r$//' "$0"
+set -eu
 
 if [ -z "${DATABASE_URL:-}" ]; then
   echo "DATABASE_URL is required for the backend to start." >&2
