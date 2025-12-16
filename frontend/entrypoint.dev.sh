@@ -1,4 +1,4 @@
-﻿#!/bin/sh
+#!/bin/sh
 sed -i 's/\r$//' "$0"
 set -eu
 
