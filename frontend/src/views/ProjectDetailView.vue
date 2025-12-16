@@ -1,56 +1,125 @@
 <template>
-  <div class="space-y-6">
+  <div class="space-y-8">
 
-    <!-- Header with project title -->
-    <div class="space-y-1">
-      <h1 class="text-3xl font-bold text-gray-900">
-        {{ project?.title }}
-      </h1>
-      <p class="text-gray-500 text-sm">
+    <!-- HEADER -->
+    <div class="space-y-2">
+      <p class="text-sm uppercase tracking-wide text-gray-400">Project</p>
+
+      <div class="flex flex-wrap items-center gap-8">
+        <h1 class="text-3xl font-bold text-gray-900">
+          {{ project?.title }}
+        </h1>
+
+        <!-- Status -->
+        <div v-if="project" class="flex items-center gap-2">
+          <span class="text-sm text-gray-500">Status:</span>
+          <span
+            class="px-3 py-1 rounded-full text-sm font-medium border"
+            :class="statusClasses(project.status)"
+          >
+            {{ project.status }}
+          </span>
+        </div>
+
+        <!-- Priority -->
+        <div v-if="project" class="flex items-center gap-2">
+          <span class="text-sm text-gray-500">Priority:</span>
+          <span
+            class="px-3 py-1 rounded-full text-sm font-medium border"
+            :class="priorityClasses(project.priority)"
+          >
+            {{ project.priority }}
+          </span>
+        </div>
+      </div>
+
+      <p class="text-sm text-gray-500 mt-6">
         Project ID: {{ project?.id }}
       </p>
     </div>
 
-    <!-- Section: General information -->
-    <section class="p-4 bg-white shadow rounded-lg border">
-      <h2 class="text-lg font-semibold mb-3">General information</h2>
+    <!-- LOADING / ERROR -->
+    <div
+      v-if="loading"
+      class="bg-white border rounded-lg p-6 shadow-sm text-gray-600"
+    >
+      Loading project...
+    </div>
 
-      <div v-if="loading" class="text-gray-600">Loading project...</div>
-      <div v-else-if="!project" class="text-red-600">Project not found.</div>
+    <div
+      v-else-if="!project"
+      class="bg-white border rounded-lg p-6 shadow-sm text-red-600"
+    >
+      Project not found.
+    </div>
 
-      <div v-else class="space-y-2">
-        <p><strong>Title:</strong> {{ project.title }}</p>
+    <!-- CONTENT -->
+    <template v-else>
 
-        <!-- Placeholder for future project fields -->
-        <div class="mt-4 p-3 bg-gray-50 border rounded-lg text-gray-500 text-sm">
-          Additional project details will be added here in the future.
+      <!-- GENERAL INFO -->
+      <section class="bg-white border rounded-lg p-6 shadow-sm space-y-4">
+        <h2 class="text-lg font-semibold text-gray-900">General information</h2>
+
+        <div v-if="project.description">
+          <p class="text-sm text-gray-500 mb-1">Description</p>
+          <p class="text-gray-800">
+            {{ project.description }}
+          </p>
         </div>
-      </div>
-    </section>
 
-    <!-- Section: Dates -->
-    <section v-if="project" class="p-4 bg-white shadow rounded-lg border">
-        <h2 class="text-lg font-semibold mb-3">Dates</h2>
+        <div v-else class="text-sm text-gray-400 italic">
+          No description provided.
+        </div>
 
-        <p><strong>Created at:</strong> {{ formatDate(project.createdAt) }}</p>
-        <p><strong>Updated at:</strong> {{ formatDate(project.updatedAt) }}</p>
-    </section>
+        <!-- TAGS -->
+        <div>
+          <p class="text-sm text-gray-500 mb-2">Tags</p>
 
+          <div v-if="project.tags.length" class="flex flex-wrap gap-2">
+            <span
+              v-for="tag in project.tags"
+              :key="tag"
+              class="px-3 py-1 text-sm rounded-full bg-gray-100 text-gray-700 border"
+            >
+              {{ tag }}
+            </span>
+          </div>
 
-    <!-- Placeholder for future tasks -->
-    <section class="p-4 bg-gray-50 shadow-inner rounded-lg border">
-      <h2 class="text-lg font-semibold mb-3">Tasks</h2>
-      <p class="text-gray-500">Tasks section will be implemented soon.</p>
-    </section>
+          <div v-else class="text-sm text-gray-400 italic">
+            No tags.
+          </div>
+        </div>
+      </section>
+
+      <!-- DATES -->
+      <section class="bg-white border rounded-lg p-6 shadow-sm space-y-3">
+        <h2 class="text-lg font-semibold text-gray-900">Dates</h2>
+
+        <p class="text-sm text-gray-700">
+          <strong>Deadline:</strong> {{ project.deadline ? formatDate(project.deadline) : "No deadline set" }} 
+        </p>
+
+        <p class="text-sm text-gray-700">
+          <strong>Created at:</strong> {{ formatDate(project.createdAt) }}
+        </p>
+
+        <p class="text-sm text-gray-700">
+          <strong>Updated at:</strong> {{ formatDate(project.updatedAt) }}
+        </p>
+      </section>
+
+    </template>
 
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
-import { getProject } from '../services/projectService'
-import type { IProject } from '../types/types'
+import { ref, onMounted } from "vue"
+import { useRoute } from "vue-router"
+import { getProject } from "../services/projectService"
+import type { IProject } from "../types/types"
+import { priorityClasses, statusClasses } from "../helpers/projectBadgeClasses"
+import { formatDate } from "../helpers/formatDates"
 
 const route = useRoute()
 const loading = ref(true)
@@ -60,14 +129,13 @@ onMounted(async () => {
   try {
     const id = route.params.id as string
     project.value = await getProject(id)
-  } catch (error) {
+  } catch {
     project.value = null
   } finally {
     loading.value = false
   }
 })
 
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleString()
-}
+
+
 </script>

@@ -37,29 +37,21 @@
           <span class="text-xs text-gray-400">ID: {{ project.id.slice(0, 6) }}...</span>
         </div>
 
-        <p class="text-xs text-gray-500 mt-1">Created: {{ formatDate(project.createdAt) }}</p>
+        <p class="text-xs text-gray-500 mt-1">Created: {{ formatDateShort(project.createdAt) }}</p>
 
-        <!-- Extra info (status + priority) -->
-        <div class="flex flex-col gap-2 mt-3 text-xs font-medium">
-          <div class="flex items-center gap-4">
-          <span class="w-9 text-left">Status: </span>
-          <span class="px-2 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-100">
-            {{ project.status }}
-          </span>
-          </div>
-          <div class="flex items-center gap-2">
-          <span class="w-11 text-left">Priority: </span>
+        <div class="flex items-center gap-2 mt-2 text-xs font-medium">
           <span
             class="px-2 py-1 rounded-full border"
-            :class="{
-              'bg-green-50 text-green-700 border-green-100': project.priority === 'LOW',
-              'bg-amber-50 text-amber-700 border-amber-100': project.priority === 'MEDIUM',
-              'bg-red-50 text-red-700 border-red-100': project.priority === 'HIGH',
-            }"
+            :class="statusClasses(project.status)"
+          >
+            {{ project.status }}
+          </span>
+          <span
+            class="px-2 py-1 rounded-full border"
+            :class="priorityClasses(project.priority)"
           >
             {{ project.priority }}
           </span>
-          </div>
         </div>
       </li>
     </ul>
@@ -78,6 +70,8 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { getProjects } from '../services/projectService'
+import { priorityClasses, statusClasses } from '../helpers/projectBadgeClasses'
+import { formatDateShort } from '../helpers/formatDates'
 import type { IProject } from '../types/types'
 import CreateProjectModal from '../components/CreateProjectModal.vue'
 
@@ -99,10 +93,6 @@ onMounted(async () => {
 function handleProjectCreated(project: IProject) {
   projects.value.push(project)
   showCreateModal.value = false
-}
-
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleString("en-UK", { dateStyle: "short" })
 }
 
 function handleProjectDetail(id: string) {
