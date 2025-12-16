@@ -13,7 +13,7 @@ RUN npm install
 COPY . .
 
 # Optional build-time variable (kept for flexibility)
-ARG VITE_API_URL
+ARG VITE_API_URL=/api
 ENV VITE_API_URL=$VITE_API_URL
 
 # Build the production-ready frontend

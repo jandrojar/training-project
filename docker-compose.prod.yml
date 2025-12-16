@@ -19,9 +19,14 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+      args:
+        DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:postgres@db:5432/training_db}
     env_file:
       - ./backend/.env.production
-    command: ["sh", "/app/entrypoint.sh"]
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+    command: ["/app/entrypoint.sh"]
     depends_on:
       - db
     # Backend does NOT need to expose any port in production
