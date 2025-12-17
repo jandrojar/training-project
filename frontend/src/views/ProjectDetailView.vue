@@ -89,6 +89,21 @@
             No tags.
           </div>
         </div>
+
+        <!-- DATES -->
+        <div class="space-y-1">
+          <p class="text-sm text-gray-500 mb-2">Dates</p>
+          <p class="text-sm text-gray-700">
+            <strong>Deadline:</strong>
+            {{ project.deadline ? formatDate(project.deadline) : "No deadline set" }}
+          </p>
+          <p class="text-sm text-gray-700">
+            <strong>Created at:</strong> {{ formatDate(project.createdAt) }}
+          </p>
+          <p class="text-sm text-gray-700">
+            <strong>Updated at:</strong> {{ formatDate(project.updatedAt) }}
+          </p>
+        </div>
       </section>
 
       <!-- TASKS -->
@@ -118,7 +133,7 @@
           No tasks yet.
         </div>
 
-        <div v-else class="space-y-3">
+        <div v-else class="grid gap-3 md:grid-cols-2">
           <article
             v-for="task in tasks"
             :key="task.id"
@@ -184,23 +199,6 @@
         </div>
       </section>
 
-      <!-- DATES -->
-      <section class="bg-white border rounded-lg p-6 shadow-sm space-y-3">
-        <h2 class="text-lg font-semibold text-gray-900">Dates</h2>
-
-        <p class="text-sm text-gray-700">
-          <strong>Deadline:</strong> {{ project.deadline ? formatDate(project.deadline) : "No deadline set" }} 
-        </p>
-
-        <p class="text-sm text-gray-700">
-          <strong>Created at:</strong> {{ formatDate(project.createdAt) }}
-        </p>
-
-        <p class="text-sm text-gray-700">
-          <strong>Updated at:</strong> {{ formatDate(project.updatedAt) }}
-        </p>
-      </section>
-
     </template>
 
   </div>
@@ -233,7 +231,7 @@ const tasks = ref<ITask[]>([])
 const tasksError = ref<string | null>(null)
 const showTaskModal = ref(false)
 const editingTask = ref<ITask | null>(null)
-const taskActioningId = ref<string | null>(null)
+const taskActioningId = ref<string | null>(null) // For disabling buttons while actioning a task
 
 onMounted(async () => {
   const id = route.params.id as string
@@ -268,7 +266,7 @@ function handleTaskCreated(task: ITask) {
 function handleTaskUpdated(task: ITask) {
   const idx = tasks.value.findIndex(t => t.id === task.id)
   if (idx !== -1) {
-    tasks.value.splice(idx, 1, task)
+    tasks.value.splice(idx, 1, task) // Update the task in place
   }
   closeTaskModal()
 }

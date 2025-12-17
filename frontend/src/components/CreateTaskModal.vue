@@ -79,11 +79,13 @@ import { computed, onMounted, onUnmounted, ref, watch } from "vue"
 import { createTask, updateTask } from "../services/taskService"
 import type { ITask, ITaskPayload } from "../types/types"
 
+
 const props = defineProps<{
   projectId: string
   task?: ITask | null
 }>()
 
+// Emit events for parent component
 const emit = defineEmits<{
   (e: "created", task: ITask): void
   (e: "updated", task: ITask): void
@@ -93,22 +95,26 @@ const emit = defineEmits<{
 const loading = ref(false)
 const errorMsg = ref("")
 
+// Form data
 const form = ref<ITaskPayload>({
   title: "",
   description: "",
   deadline: undefined,
 })
 
-const isEdit = computed(() => !!props.task)
+// Determine if editing or creating
+const isEdit = computed(() => !!props.task ) // !! boolean conversion
+
 
 onMounted(() => {
-  document.body.classList.add("overflow-hidden")
+  document.body.classList.add("overflow-hidden") // Prevent background scrolling
 })
 
 onUnmounted(() => {
   document.body.classList.remove("overflow-hidden")
 })
 
+// Watch for changes in the task prop to fill form when editing
 watch(
   () => props.task,
   task => {
@@ -127,7 +133,7 @@ watch(
     }
     errorMsg.value = ""
   },
-  { immediate: true }
+  { immediate: true } // Run immediately on component mount
 )
 
 async function handleSubmit() {
