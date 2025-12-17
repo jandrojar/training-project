@@ -48,3 +48,19 @@ export interface IProject {
   createdAt: string
   updatedAt: string
 }
+
+export interface ITaskPayload {
+  title: string,
+  description?: string,
+  deadline?: string | Date,
+}
+
+export interface ITask{
+  id: string,
+  title: string,
+  description?: string,
+  done: boolean,
+  deadline?: string | null,
+  createdAt: string,
+  updatedAt: string,
+}
