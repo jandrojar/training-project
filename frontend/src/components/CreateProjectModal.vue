@@ -9,8 +9,12 @@
       <!-- Header -->
       <div class="flex justify-between items-center pb-2 border-b">
         <div>
-          <p class="text-xs uppercase tracking-wide text-gray-400">New project</p>
-          <h2 class="text-2xl font-semibold text-gray-900">Create project</h2>
+          <p class="text-xs uppercase tracking-wide text-gray-400">
+            {{ isEdit ? "Edit project" : "New project" }}
+          </p>
+          <h2 class="text-2xl font-semibold text-gray-900">
+            {{ isEdit ? "Update project" : "Create project" }}
+          </h2>
         </div>
         <button @click="$emit('close')" class="text-gray-400 hover:text-gray-700 text-2xl leading-none px-2 cursor-pointer">
           ×
@@ -105,7 +109,15 @@
             class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 shadow-sm cursor-pointer"
             :disabled="loading"
           >
-            {{ loading ? "Creating..." : "Create Project" }}
+            {{
+              loading
+                ? isEdit
+                  ? "Updating..."
+                  : "Creating..."
+                : isEdit
+                  ? "Update Project"
+                  : "Create Project"
+            }}
           </button>
         </div>
 
@@ -115,11 +127,19 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref } from "vue"
-import { createProject } from "../services/projectService"
-import type { IProjectPayload } from "../types/types"
+import { computed, onMounted, onUnmounted, ref, watch } from "vue"
+import { createProject, updateProject } from "../services/projectService"
+import type { IProject, IProjectPayload } from "../types/types"
 
-const emit = defineEmits(["created", "close"])
+const props = defineProps<{
+  project?: IProject | null
+}>()
+
+const emit = defineEmits<{
+  (e: "created", project: IProject): void
+  (e: "updated", project: IProject): void
+  (e: "close"): void
+}>()
 
 // STATE
 const loading = ref(false)
@@ -138,6 +158,8 @@ const form = ref<IProjectPayload>({
 // RAW TAGS INPUT
 const tagsInput = ref("")
 
+const isEdit = computed(() => !!props.project)
+
 onMounted(() => {
   document.body.classList.add("overflow-hidden")
 })
@@ -145,6 +167,35 @@ onMounted(() => {
 onUnmounted(() => {
   document.body.classList.remove("overflow-hidden")
 })
+
+watch(
+  () => props.project,
+  project => {
+    if (project) {
+      form.value = {
+        title: project.title,
+        description: project.description || "",
+        status: project.status,
+        priority: project.priority,
+        tags: project.tags,
+        deadline: project.deadline ? project.deadline.slice(0, 10) : undefined,
+      }
+      tagsInput.value = project.tags.join(", ")
+    } else {
+      form.value = {
+        title: "",
+        description: "",
+        status: "PLANNED",
+        priority: "MEDIUM",
+        tags: [],
+        deadline: undefined,
+      }
+      tagsInput.value = ""
+    }
+    errorMsg.value = ""
+  },
+  { immediate: true }
+)
 
 async function handleSubmit() {
   errorMsg.value = ""
@@ -168,11 +219,17 @@ async function handleSubmit() {
       tags,
     }
 
-    const created = await createProject(payload)
-
-    emit("created", created)
+    if (isEdit.value && props.project) {
+      const updated = await updateProject(props.project.id, payload)
+      emit("updated", updated)
+    } else {
+      const created = await createProject(payload)
+      emit("created", created)
+    }
   } catch (err: any) {
-    errorMsg.value = err.error || "Failed to create project"
+    const message =
+      typeof err === "string" ? err : err?.error || err?.message
+    errorMsg.value = message || "Failed to save project"
   } finally {
     loading.value = false
   }

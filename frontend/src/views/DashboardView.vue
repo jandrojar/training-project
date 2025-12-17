@@ -9,7 +9,7 @@
 
       <!-- New Project Button -->
       <button
-        @click="showCreateModal = true"
+        @click="openCreateProject"
         class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 shadow-sm transition cursor-pointer"
       >
         + New Project
@@ -32,9 +32,35 @@
         @click="handleProjectDetail(project.id)"
         class="p-4 bg-white rounded-lg shadow-sm border cursor-pointer hover:-translate-y-0.5 hover:shadow-md transition"
       >
-        <div class="flex items-start justify-between">
-          <h2 class="text-lg font-semibold text-gray-900">{{ project.title }}</h2>
-          <span class="text-xs text-gray-400">ID: {{ project.id.slice(0, 6) }}...</span>
+        <div class="flex items-start justify-between gap-4">
+          <div class="space-y-1">
+            <p class="text-xs text-gray-400">ID: {{ project.id.slice(0, 6) }}...</p>
+            <h2 class="text-lg font-semibold text-gray-900 mt-2">{{ project.title }}</h2>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button
+              :disabled="projectActioningId === project.id"
+              class="p-2 rounded-lg border border-gray-200 hover:bg-gray-100 cursor-pointer disabled:opacity-50"
+              title="Edit project"
+              @click.stop="openEditProject(project)"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 20h9"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16.5 3.5a2.121 2.121 0 013 3L8 18l-4 1 1-4z"></path>
+              </svg>
+            </button>
+            <button
+              :disabled="projectActioningId === project.id"
+              class="p-2 rounded-lg border border-gray-200 hover:bg-red-50 hover:border-red-200 hover:text-red-600 cursor-pointer disabled:opacity-50"
+              title="Delete project"
+              @click.stop="handleDeleteProject(project)"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m-3 0h14"></path>
+              </svg>
+            </button>
+          </div>
         </div>
 
         <p class="text-xs text-gray-500 mt-1">Created: {{ formatDateShort(project.createdAt) }}</p>
@@ -58,9 +84,11 @@
 
     <!-- MODAL -->
     <CreateProjectModal
-      v-if="showCreateModal"
-      @close="showCreateModal = false"
+      v-if="showProjectModal"
+      :project="editingProject"
+      @close="closeProjectModal"
       @created="handleProjectCreated"
+      @updated="handleProjectUpdated"
     />
 
   </div>
@@ -69,7 +97,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { getProjects } from '../services/projectService'
+import { deleteProject, getProjects } from '../services/projectService'
 import { priorityClasses, statusClasses } from '../helpers/projectBadgeClasses'
 import { formatDateShort } from '../helpers/formatDates'
 import type { IProject } from '../types/types'
@@ -77,7 +105,9 @@ import CreateProjectModal from '../components/CreateProjectModal.vue'
 
 const loading = ref(true)
 const projects = ref<IProject[]>([])
-const showCreateModal = ref(false)
+const showProjectModal = ref(false)
+const editingProject = ref<IProject | null>(null)
+const projectActioningId = ref<string | null>(null)
 
 const router = useRouter()
 
@@ -91,11 +121,48 @@ onMounted(async () => {
 })
 
 function handleProjectCreated(project: IProject) {
-  projects.value.push(project)
-  showCreateModal.value = false
+  projects.value.unshift(project)
+  closeProjectModal()
+}
+
+function handleProjectUpdated(project: IProject) {
+  const idx = projects.value.findIndex(p => p.id === project.id)
+  if (idx !== -1) {
+    projects.value.splice(idx, 1, project)
+  }
+  closeProjectModal()
 }
 
 function handleProjectDetail(id: string) {
   router.push(`/app/projects/${id}`)
+}
+
+function openCreateProject() {
+  editingProject.value = null
+  showProjectModal.value = true
+}
+
+function openEditProject(project: IProject) {
+  editingProject.value = project
+  showProjectModal.value = true
+}
+
+function closeProjectModal() {
+  showProjectModal.value = false
+  editingProject.value = null
+}
+
+async function handleDeleteProject(project: IProject) {
+  const confirmed = window.confirm("Delete this project?")
+  if (!confirmed) return
+  projectActioningId.value = project.id
+  try {
+    await deleteProject(project.id)
+    projects.value = projects.value.filter(p => p.id !== project.id)
+  } catch (err: any) {
+    console.error(err)
+  } finally {
+    projectActioningId.value = null
+  }
 }
 </script>
