@@ -10,7 +10,7 @@
       <!-- New Project Button -->
       <button
         @click="openCreateProject"
-        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 shadow-sm transition cursor-pointer"
+        class="px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 shadow-sm transition cursor-pointer"
       >
         + New Project
       </button>

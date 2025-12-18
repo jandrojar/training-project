@@ -113,7 +113,7 @@
           <div class="flex items-center gap-3">
             <span class="text-sm text-gray-500">{{ tasks.length }} total</span>
             <button
-              class="px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 shadow-sm text-sm cursor-pointer"
+              class="px-3 py-1.5 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 shadow-sm text-sm cursor-pointer"
               @click="openCreateTask"
             >
               + New Task

@@ -50,7 +50,7 @@
         <!-- Submit -->
         <button
           type="submit"
-          class="w-full py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition cursor-pointer"
+          class="w-full py-2 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition cursor-pointer"
         >
           Sign up
         </button>
@@ -59,7 +59,7 @@
       <p class="text-center text-sm mt-4">
         Already have an account?
         <router-link to="/login" class="text-blue-600 hover:underline">
-          Log in
+          Login here
         </router-link>
       </p>
     </div>

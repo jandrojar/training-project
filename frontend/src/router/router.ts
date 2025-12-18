@@ -12,9 +12,9 @@ const routes = [
     path: '/',
     component: AuthLayout,
     children: [
-      { path: '/', name: 'landing', component: LandingView },
-      { path: 'login', name: 'login', component: LoginView },
-      { path: 'register', name: 'register', component: RegisterView },
+      { path: '/', name: 'landing', component: LandingView, meta: { page: 'Landing' } },
+      { path: 'login', name: 'login', component: LoginView, meta: { page: 'Login' } },
+      { path: 'register', name: 'register', component: RegisterView, meta: { page: 'SignUp' } },
     ]
   },
   {

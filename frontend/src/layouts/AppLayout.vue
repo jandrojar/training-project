@@ -2,11 +2,13 @@
   <div class="min-h-screen flex flex-col bg-white">
     <!-- Top navigation -->
     <header class="w-full h-16 border-b flex items-center justify-between px-6">
-      <h1 class="text-xl font-semibold tracking-tight">Training App</h1>
+      <div class="flex items-center gap-3">
+        <img src="../assets/Logo.svg" alt="Project Manager App logo" class="h-15 w-auto" />
+      </div>
 
       <!-- Placeholder for user menu -->
       <div class="text-gray-600">User</div>
-      <button @click="handleLogout"  type="button" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition cursor-pointer">
+      <button @click="handleLogout"  type="button" class="px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition cursor-pointer">
         Logout
       </button>
     </header>

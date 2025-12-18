@@ -22,11 +22,18 @@
 
         <button
           type="submit"
-          class="w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition cursor-pointer"
+          class="w-full py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition cursor-pointer"
         >
           Login
         </button>
       </form>
+
+      <p class="text-center text-sm mt-4">
+        Don't have an account yet?
+        <router-link to="/register" class="text-blue-600 hover:underline">
+          Sign up here
+        </router-link>
+      </p>
     </div>
   </div>
 </template>

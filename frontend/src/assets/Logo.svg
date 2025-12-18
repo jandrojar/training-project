@@ -1,0 +1,16 @@
+<svg width="500" height="200" viewBox="0 0 500 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="20" y="40" width="100" height="110" rx="12" stroke="#2D3748" stroke-width="8"/>
+  
+  <rect x="35" y="65" width="15" height="15" rx="2" fill="#2D3748"/>
+  <rect x="35" y="93" width="15" height="15" rx="2" fill="#2D3748"/>
+  <rect x="35" y="121" width="15" height="15" rx="2" fill="#2D3748"/>
+  
+  <line x1="60" y1="100.5" x2="95" y2="100.5" stroke="#2D3748" stroke-width="7" stroke-linecap="round"/>
+  <line x1="60" y1="128.5" x2="95" y2="128.5" stroke="#2D3748" stroke-width="7" stroke-linecap="round"/>
+  
+  <path d="M60 75L72 87L105 54" stroke="#3182CE" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <text x="140" y="95" fill="#2D3748" style="font-family: var(--default-font-family, ui-sans-serif, system-ui, sans-serif); font-size: 52px; font-weight: 600; letter-spacing: -1px;">Project</text>
+  <text x="140" y="152" fill="#2D3748" style="font-family: var(--default-font-family, ui-sans-serif, system-ui, sans-serif); font-size: 52px; font-weight: 600; letter-spacing: -1px;">Manager</text>
+  <text x="355" y="152" fill="#3182CE" style="font-family: var(--default-font-family, ui-sans-serif, system-ui, sans-serif); font-size: 52px; font-weight: 600; letter-spacing: -1px;">App</text>
+</svg>
