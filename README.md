@@ -1,96 +1,91 @@
 # Training Project
 
-Full-stack app: **Backend** (Node 20 + TypeScript + Koa + Prisma + PostgreSQL) and **Frontend** (Vue 3 + Vite + Tailwind). The repo now ships two clean Docker Compose setups (dev & prod) plus instructions to run everything without Docker.
+Full-stack app: **Backend** (Node 20, TypeScript, Koa, Prisma, PostgreSQL) and **Frontend** (Vue 3, Vite, Tailwind). Two Compose files are provided (dev + prod) plus instructions to run without Docker.
 
-Key Prisma note: the datasource URL is read from `prisma.config.ts` (Prisma 5/7 style), **not** from `schema.prisma`.
+Prisma reads `DATABASE_URL` from `prisma.config.ts` (Prisma 5/7 style), not from `schema.prisma`.
 
 ---
 
 ## Requirements
-- Docker & Docker Compose (for containerized workflows)
-- Node.js 20 + npm (for running without Docker)
+- Docker + Docker Compose (for container workflows)
+- Running without Docker: Node.js 20, npm 10, and a PostgreSQL instance you manage (npm does **not** install Postgres for you). `psql` is recommended for quick checks.
 
 ---
 
-## Environment Variables
-Samples are provided; copy and adjust as needed.
-
-- Backend (local dev): `backend/.env.example` → `backend/.env`
-- Backend (prod/local or Compose prod): `backend/.env.production.example` → `backend/.env.production`
-- Frontend (local dev): `frontend/.env.example` → `frontend/.env.development` (or set `VITE_API_URL` inline)
+## Environment Files
+Copy the sample that matches your run mode and edit values (DB password, origins, etc).
+- Backend (dev): `backend/.env.example` → `backend/.env`
+- Backend (prod/prod-like): `backend/.env.production.example` → `backend/.env.production`
+- Frontend (dev): `frontend/.env.example` → `frontend/.env.development` (or export `VITE_API_URL`)
 
 ---
 
 ## Run with Docker (Development)
-Hot-reload for frontend + backend, Postgres exposed on host `5433`.
+Hot reload for frontend + backend. Postgres is exposed on `5433` for local tools.
 
 ```bash
-docker compose up --build
-# or: docker compose up --build -d   # run in background
+docker compose up --build      # add -d to detach
 ```
 
-What happens:
-- Backend installs deps if needed, waits for Postgres, runs `prisma migrate deploy`, then starts on `:3000`.
-- Frontend starts Vite dev server on `:5173`.
+What it does:
+- DB: postgres:16 on `localhost:5433` (`postgres/postgres`, db `training_db`)
+- Backend: installs deps if needed, waits for DB, runs `prisma migrate deploy`, serves `:3000`
+- Frontend: Vite dev server on `:5173`
 
-Access:
-- Frontend: http://localhost:5173
-- Backend API: http://localhost:3000
-- Database: host `localhost:5433` (user/pass: `postgres` / `postgres`, db: `training_db`)
-
-Useful commands:
+Useful:
 ```bash
 docker compose logs -f backend
 docker compose exec backend npx prisma studio
-docker compose down          # stop containers
-docker compose down -v       # stop and drop dev DB volume
+docker compose down            # stop
+docker compose down -v         # stop + drop dev DB & node_modules volumes
 ```
 
 ---
 
 ## Run with Docker (Production-style)
-Creates optimized images and serves frontend via nginx proxying `/api` to the backend.
+Builds optimized images; nginx serves the frontend and proxies `/api` to the backend.
 
-1) Prepare env file: `cp backend/.env.production.example backend/.env.production` and edit values (DB password, CORS origin, etc).
-2) Build & start:
 ```bash
+cp backend/.env.production.example backend/.env.production  # edit values
 docker compose -f docker-compose.prod.yml build
 docker compose -f docker-compose.prod.yml up -d
 ```
 
-What happens:
-- Backend image is built once (Prisma client generated during build).
-- At runtime, backend waits for DB, runs `prisma migrate deploy`, then serves on the internal network.
-- Frontend served on http://localhost (port 80 by default).
+What it does:
+- Backend image is built once (Prisma client generated during build)
+- At runtime: waits for DB, runs `prisma migrate deploy`, then serves inside the Compose network
+- Frontend available at http://localhost (port 80)
 
-Stop:
+Shutdown:
 ```bash
 docker compose -f docker-compose.prod.yml down
-docker compose -f docker-compose.prod.yml down -v   # also remove DB data
+docker compose -f docker-compose.prod.yml down -v   # also drop prod DB volume
 ```
 
 ---
 
 ## Run without Docker
 ### Database
-Ensure PostgreSQL is running and reachable; create `training_db` (or adjust `DATABASE_URL`).
+Provide a reachable PostgreSQL and create `training_db` (or set `DATABASE_URL` to your DB name). Make sure the DB user has rights to create/alter tables before running migrations.
 
 ### Backend (development)
 ```bash
 cd backend
-cp .env.example .env   # adjust if needed
+cp .env.example .env
 npm ci
-npx prisma migrate dev
+npx prisma migrate dev          # applies migrations + creates new ones when schema changes
 npm run dev
 ```
 
-### Backend (production-ish local run)
+### Backend (local production-ish)
 ```bash
 cd backend
-cp .env.production.example .env.production   # adjust values
-npm ci --omit=dev
-npx prisma migrate deploy
+cp .env.production.example .env.production
+# Build requires dev deps (tsc), then you can drop them
+npm ci
+npx prisma migrate deploy       # apply existing migrations only
 npm run build
+npm prune --omit=dev
 npm run start
 ```
 
@@ -102,16 +97,34 @@ npm ci
 npm run dev -- --host 0.0.0.0 --port 5173
 ```
 
-### Frontend (production build)
+### Frontend (production bundle)
 ```bash
 cd frontend
-VITE_API_URL=/api npm run build    # or set the URL you want baked into the bundle
-# serve ./dist with any static server or nginx that proxies /api to the backend
+VITE_API_URL=/api npm run build    # use /api only if you have a reverse proxy
+```
+If you are NOT using a reverse proxy, build with `VITE_API_URL=http://localhost:3000` and make sure the backend allows CORS from your frontend origin.
+
+Serve the generated `frontend/dist` with any static server. Example:
+```bash
+cd frontend
+npx serve -s dist
+```
+If you use a static server without a reverse proxy, set `CORS_ORIGIN` on the backend to the exact frontend URL (including port). To avoid changing it every time, start the static server on a fixed port. Example:
+```bash
+CORS_ORIGIN=http://localhost:5173 npm run start
 ```
 
 ---
 
-## File Map (Docker-related)
+## Migrations Cheat Sheet
+- **Prisma URL source**: always from `backend/prisma.config.ts` (`DATABASE_URL` env var). Set it before any Prisma command.
+- **Dev with Docker**: `docker compose exec backend npx prisma migrate dev --name <name>` to create/apply a new migration. Restart or `docker compose up` to reapply after volume resets.
+- **Prod-style Docker**: add migrations locally (they live under `backend/prisma/migrations`), rebuild images, then `docker compose -f docker-compose.prod.yml up -d` (startup runs `prisma migrate deploy`).
+- **Without Docker**: `npx prisma migrate dev --name <name>` when developing; `npx prisma migrate deploy` against the target DB when promoting changes.
+
+---
+
+## File Map (containers)
 - Dev compose: `docker-compose.yml`
 - Prod compose: `docker-compose.prod.yml`
 - Backend Dockerfiles: `backend/Dockerfile` (prod), `backend/Dockerfile.dev` (dev)
@@ -121,8 +134,6 @@ VITE_API_URL=/api npm run build    # or set the URL you want baked into the bund
 ---
 
 ## Notes & Troubleshooting
-- Prisma uses `DATABASE_URL` from `prisma.config.ts`; ensure it matches your DB before running any `prisma` command.
-- Dev containers auto-run `prisma migrate deploy`; if you add a new migration, rebuild or re-run the backend container.
-- If ports are busy, override with `PORT=3001 VITE_API_URL=http://localhost:3001` in compose overrides or env files.
-- For a clean slate in dev, run `docker compose down -v` to drop the Postgres volume.
-- If you change dependencies and something feels stale, rebuild and clear the `backend_node_modules` / `frontend_node_modules` volumes (`docker compose down -v`) before starting again.
+- If ports are busy, override with envs (e.g., `PORT=3001`, `VITE_API_URL=http://localhost:3001`) in Compose overrides or env files.
+- When dependencies or Prisma client feel stale in dev Compose, rebuild and clear the node_modules volumes: `docker compose down -v` then `docker compose up --build`.
+- For a clean slate DB in dev: `docker compose down -v`.
