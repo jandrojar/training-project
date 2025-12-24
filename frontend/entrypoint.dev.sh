@@ -3,7 +3,7 @@ sed -i 's/\r$//' "$0"
 set -eu
 
 echo "Ensuring frontend dependencies are installed..."
-if [ ! -d node_modules ]; then
+if [ ! -d node_modules ] || [ ! -f node_modules/.bin/vite ]; then
   npm ci
 fi
 
