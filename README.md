@@ -1,6 +1,8 @@
 # Training Project
 
-Full-stack app: **Backend** (Node 20, TypeScript, Koa, Prisma, PostgreSQL) and **Frontend** (Vue 3, Vite, Tailwind). Two Compose files are provided (dev + prod) plus instructions to run without Docker.
+Purpose: a simple full‑stack training app for authentication and managing projects/tasks.
+
+Stack: **Backend** (Node 20, TypeScript, Koa, Prisma, PostgreSQL) and **Frontend** (Vue 3, Vite, Tailwind). Two Compose files are provided (dev + prod) plus instructions to run without Docker.
 
 Prisma reads `DATABASE_URL` from `prisma.config.ts` (Prisma 5/7 style), not from `schema.prisma`.
 
@@ -9,6 +11,7 @@ Prisma reads `DATABASE_URL` from `prisma.config.ts` (Prisma 5/7 style), not from
 ## Requirements
 - Docker + Docker Compose (for container workflows)
 - Running without Docker: Node.js 20, npm 10, and a PostgreSQL instance you manage (npm does **not** install Postgres for you). `psql` is recommended for quick checks.
+- Windows users: use WSL or Git Bash; if using PowerShell, translate `cp`/`export` commands accordingly.
 
 ---
 
