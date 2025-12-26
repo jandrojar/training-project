@@ -7,13 +7,13 @@ WORKDIR /app
 
 # Install dependencies (cached layer)
 COPY package*.json ./
-RUN npm install
+RUN npm ci
 
 # Copy application source code
 COPY . .
 
 # Optional build-time variable (kept for flexibility)
-ARG VITE_API_URL
+ARG VITE_API_URL=/api
 ENV VITE_API_URL=$VITE_API_URL
 
 # Build the production-ready frontend

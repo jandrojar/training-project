@@ -3,7 +3,6 @@ version: "3.9"
 services:
 
   frontend:
-    container_name: training_frontend_prod
     build:
       context: ./frontend
       dockerfile: Dockerfile
@@ -11,30 +10,36 @@ services:
         VITE_API_URL: /api
     ports:
       - "80:80"
-    depends_on:
-      - backend
-
   backend:
-    container_name: training_backend_prod
     build:
       context: ./backend
       dockerfile: Dockerfile
+      args:
+        DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:postgres@db:5432/training_db}
     env_file:
       - ./backend/.env.production
-    command: ["sh", "/app/entrypoint.sh"]
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+    command: ["/app/entrypoint.sh"]
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     # Backend does NOT need to expose any port in production
     # Nginx will communicate with it internally in the Docker network
 
   db:
-    container_name: training_db_prod
     image: postgres:16
     restart: always
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: training_db
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     volumes:
       - pgdata_prod:/var/lib/postgresql/data
     # DB should NOT be exposed to the host in production

@@ -1,29 +1,46 @@
-# Use a lightweight Node.js image
-FROM node:20-alpine
-
-# Set the working directory inside the container
+# -----------------------------------------------------------------------------
+# Build stage
+# -----------------------------------------------------------------------------
+FROM node:20-alpine AS build
 WORKDIR /app
 
-# Copy dependency manifests first (to leverage Docker cache)
+# Avoid Prisma telemetry noise during builds
+ENV PRISMA_HIDE_UPDATE_MESSAGE=1
+ARG DATABASE_URL=postgresql://postgres:postgres@localhost:5432/training_db
+ENV DATABASE_URL=${DATABASE_URL}
+
 COPY package*.json ./
+# Install all dependencies (dev deps needed for TypeScript build)
+RUN npm ci
 
-# Install dependencies (includes dev deps so Prisma CLI is available to generate)
-RUN npm install
+# Copy only what is needed for Prisma + build first for better cache usage
+COPY prisma ./prisma
+COPY prisma.config.ts ./
+COPY tsconfig.json ./
+COPY src ./src
 
-# Copy the full application code
-COPY . .
-
-# Set environment variables for production
-ENV NODE_ENV=production
-
-# Generate Prisma Client based on the current schema
+# Generate Prisma client and build the app
 RUN npx prisma generate
+RUN npm run build
+# Drop dev dependencies before shipping to runtime image
+RUN npm prune --omit=dev
 
-# Expose the port used by the Koa API
+# -----------------------------------------------------------------------------
+# Runtime stage
+# -----------------------------------------------------------------------------
+FROM node:20-alpine AS runtime
+WORKDIR /app
+ENV NODE_ENV=production
+ENV PRISMA_HIDE_UPDATE_MESSAGE=1
+
+COPY --from=build /app/node_modules ./node_modules
+COPY --from=build /app/dist ./dist
+COPY --from=build /app/prisma ./prisma
+COPY --from=build /app/prisma.config.ts ./prisma.config.ts
+COPY entrypoint.sh /app/entrypoint.sh
+
+RUN chmod +x /app/entrypoint.sh
+
 EXPOSE 3000
 
-# Build TypeScript before starting (needed in production images)
-RUN npm run build
-
-# Start the server
-CMD ["npm", "run", "start"]
+CMD ["/app/entrypoint.sh"]
