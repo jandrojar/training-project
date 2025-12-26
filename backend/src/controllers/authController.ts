@@ -31,22 +31,22 @@ export async function loginHandler(ctx: Context) {
 }
 
 export async function logoutHandler(ctx: Context) {
-    const { sessionId } = ctx.request.body as { sessionId: string }; 
+  const rawAuth = ctx.headers["authorization"]
 
-    if (!sessionId) {
-        ctx.status = 400;
-        ctx.body = { error: 'Missing session id' };
-        return;
-    }
+  if (!rawAuth || typeof rawAuth !== "string" || !rawAuth.startsWith("Bearer ")) {
+    ctx.status = 400
+    ctx.body = { error: "Missing or invalid authorization header" }
+    return
+  }
 
-	try{
-		await logout(sessionId)
-		ctx.status=200
-        ctx.body={success: true}
-		return;
+  const sessionId = rawAuth.replace("Bearer ", "").trim()
 
-	} catch(err:any){
-		ctx.status=500
-		ctx.body={error:"Internal server error"}
-	}
+  try {
+    await logout(sessionId)
+    ctx.status = 200
+    ctx.body = { success: true }
+  } catch (err) {
+    ctx.status = 500
+    ctx.body = { error: "Internal server error" }
+  }
 }

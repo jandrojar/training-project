@@ -24,3 +24,6 @@ frontend/.env
 .vscode/
 .idea/
 *.swp
+
+.env.production
+.env.development

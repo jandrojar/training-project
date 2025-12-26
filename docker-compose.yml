@@ -1,0 +1,55 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: training_db
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata_dev:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/training_db
+      CORS_ORIGIN: http://localhost:5173
+      NODE_ENV: development
+      PORT: 3000
+    command: ["sh", "/app/entrypoint.dev.sh"]
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./backend:/app
+      - backend_node_modules:/app/node_modules
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    environment:
+      VITE_API_URL: http://localhost:3000
+    command: ["sh", "/app/entrypoint.dev.sh"]
+    ports:
+      - "${FRONT_PORT:-5173}:5173"
+    volumes:
+      - ./frontend:/app
+      - frontend_node_modules:/app/node_modules
+    depends_on:
+      - backend
+
+volumes:
+  pgdata_dev:
+  backend_node_modules:
+  frontend_node_modules:
