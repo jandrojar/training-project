@@ -178,7 +178,7 @@
                   </button>
                   <button
                     class="p-2 rounded-lg border border-gray-200 hover:bg-red-50 hover:border-red-200 hover:text-red-600 cursor-pointer disabled:opacity-50"
-                    @click="handleDeleteTask(task)"
+                    @click.stop="openDeleteTask(task)"
                     :disabled="taskActioningId === task.id"
                     title="Delete task"
                   >
@@ -211,6 +211,21 @@
     @created="handleTaskCreated"
     @updated="handleTaskUpdated"
   />
+
+  <ConfirmDeleteModal
+    v-if="showConfirmDeleteModal"
+    entityLabel="task"
+    :itemName="confirmDeleteTask ? confirmDeleteTask.title : ''"
+    title="Delete task"
+    description="Are you sure you want to delete this task? This action cannot be undone."
+    confirmLabel="Delete Task"
+    cancelLabel="Cancel"
+    loadingLabel="Deleting..."
+    :loading="!!confirmDeleteTask && taskActioningId === confirmDeleteTask.id"
+    :confirmDisabled="!confirmDeleteTask"
+    @close="closeConfirmDeleteModal"
+    @confirm="confirmDeleteTaskAction"
+  />
 </template>
 
 <script setup lang="ts">
@@ -222,6 +237,7 @@ import type { IProject, ITask } from "../types/types"
 import { priorityClasses, statusClasses } from "../helpers/projectBadgeClasses"
 import { formatDate, formatDateShort } from "../helpers/formatDates"
 import CreateTaskModal from "../components/CreateTaskModal.vue"
+import ConfirmDeleteModal from "../components/ConfirmDeleteModal.vue"
 
 const route = useRoute()
 const loading = ref(true)
@@ -230,6 +246,8 @@ const project = ref<IProject | null>(null)
 const tasks = ref<ITask[]>([])
 const tasksError = ref<string | null>(null)
 const showTaskModal = ref(false)
+const showConfirmDeleteModal = ref(false)
+const confirmDeleteTask = ref<ITask | null>(null)
 const editingTask = ref<ITask | null>(null)
 const taskActioningId = ref<string | null>(null) // For disabling buttons while actioning a task
 
@@ -286,6 +304,16 @@ function closeTaskModal() {
   editingTask.value = null
 }
 
+function openDeleteTask(task: ITask) {
+  confirmDeleteTask.value = task
+  showConfirmDeleteModal.value = true
+}
+
+function closeConfirmDeleteModal() {
+  showConfirmDeleteModal.value = false
+  confirmDeleteTask.value = null
+}
+
 async function toggleTaskDone(task: ITask) {
   if (!project.value) return
   taskActioningId.value = task.id
@@ -300,10 +328,9 @@ async function toggleTaskDone(task: ITask) {
   }
 }
 
-async function handleDeleteTask(task: ITask) {
-  if (!project.value) return
-  const confirmed = window.confirm("Delete this task?")
-  if (!confirmed) return
+async function confirmDeleteTaskAction() {
+  if (!project.value || !confirmDeleteTask.value) return  
+  const task = confirmDeleteTask.value
   taskActioningId.value = task.id
   try {
     await deleteTask(project.value.id, task.id)
@@ -312,6 +339,7 @@ async function handleDeleteTask(task: ITask) {
     tasksError.value = err?.message || "Could not delete task."
   } finally {
     taskActioningId.value = null
+    closeConfirmDeleteModal()
   }
 }
 </script>
