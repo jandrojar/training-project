@@ -78,8 +78,7 @@ const resolvedCancelLabel = computed(() => props.cancelLabel?.trim() || "Cancel"
 const resolvedLoadingLabel = computed(() => props.loadingLabel?.trim() || "Deleting...")
 const resolvedDescription = computed(() => {
   if (props.description?.trim()) return props.description.trim()
-  const nameSuffix = props.itemName?.trim() ? ` "${props.itemName.trim()}"` : ""
-  return `Are you sure you want to delete this ${resolvedEntityLabel.value}${nameSuffix}? This action cannot be undone.`
+  return `Are you sure you want to delete this ${resolvedEntityLabel.value}? This action cannot be undone.`
 })
 
 const itemName = computed(() => props.itemName?.trim() || "")
