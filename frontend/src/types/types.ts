@@ -64,3 +64,12 @@ export interface ITask{
   createdAt: string,
   updatedAt: string,
 }
+
+export type ToastType = 'success' | 'error' | 'warning' | 'info'
+
+export interface IToast {
+  id: string
+  type: ToastType
+  message: string
+  duration: number
+}
