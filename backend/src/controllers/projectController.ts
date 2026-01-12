@@ -21,26 +21,26 @@ export async function createProjectHandler(ctx: Context) {
 
   if (!body.title) {
     ctx.status = 400;
-    ctx.body = { error: "Title is required" };
+    ctx.body = { message: "Title is required" };
     return;
   }
 
   if (typeof body.title !== "string") {
     ctx.status = 400;
-    ctx.body = { error: "Title must be a string" };
+    ctx.body = { message: "Title must be a string" };
     return;
   }
 
   const cleanTitle = body.title.trim();
   if (!cleanTitle) {
     ctx.status = 400;
-    ctx.body = { error: "Title cannot be empty" };
+    ctx.body = { message: "Title cannot be empty" };
     return;
   }
 
   if (body.tags !== undefined && !Array.isArray(body.tags)) {
     ctx.status = 400;
-    ctx.body = { error: "Tags must be an array" };
+    ctx.body = { message: "Tags must be an array" };
     return;
   }
 
@@ -60,7 +60,7 @@ export async function createProjectHandler(ctx: Context) {
     ctx.body = project;
   } catch (err) {
     ctx.status = 400;
-    ctx.body = { error: (err as Error).message };
+    ctx.body = { message: (err as Error).message };
   }
 }
 
@@ -83,7 +83,7 @@ export async function getProjectHandler(ctx: Context) {
 
     if (!project) {
       ctx.status = 404;
-      ctx.body = { error: "Project not found" };
+      ctx.body = { message: "Project not found" };
       return;
     }
 
@@ -91,7 +91,7 @@ export async function getProjectHandler(ctx: Context) {
     ctx.body = project;
   } catch (err) {
     ctx.status = 404;
-    ctx.body = { error: (err as Error).message };
+    ctx.body = { message: (err as Error).message };
   }
 }
 
@@ -105,14 +105,14 @@ export async function updateProjectHandler(ctx: Context) {
   if (payload.title !== undefined) {
     if (typeof payload.title !== "string") {
       ctx.status = 400;
-      ctx.body = { error: "Title must be a string" };
+      ctx.body = { message: "Title must be a string" };
       return;
     }
 
     const cleanTitle = payload.title.trim();
     if (!cleanTitle) {
       ctx.status = 400;
-      ctx.body = { error: "Title cannot be empty" };
+      ctx.body = { message: "Title cannot be empty" };
       return;
     }
 
@@ -125,7 +125,7 @@ export async function updateProjectHandler(ctx: Context) {
 
   if (payload.tags !== undefined && !Array.isArray(payload.tags)) {
     ctx.status = 400;
-    ctx.body = { error: "Tags must be an array" };
+    ctx.body = { message: "Tags must be an array" };
     return;
   }
 
@@ -136,7 +136,7 @@ export async function updateProjectHandler(ctx: Context) {
     ctx.body = updated;
   } catch (err) {
     ctx.status = 400;
-    ctx.body = { error: (err as Error).message };
+    ctx.body = { message: (err as Error).message };
   }
 }
 
@@ -150,7 +150,7 @@ export async function deleteProjectHandler(ctx: Context) {
     ctx.body = { success: true };
   } catch (err) {
     ctx.status = 400;
-    ctx.body = { error: (err as Error).message };
+    ctx.body = { message: (err as Error).message };
   }
 }
 
@@ -171,6 +171,6 @@ export async function getFilteredProjectsHandler(ctx: Context) {
     ctx.body = projects;
   } catch (err) {
     ctx.status = 400;
-    ctx.body = { error: (err as Error).message };
+    ctx.body = { message: (err as Error).message };
   }
 }

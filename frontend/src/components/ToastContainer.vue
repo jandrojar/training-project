@@ -1,5 +1,5 @@
 <template>
-  <div class="fixed top-4 right-4 z-60 flex flex-col gap-3 w-full max-w-sm px-4 sm:px-0">
+  <div class="fixed top-4 right-4 z-9999 flex flex-col gap-3 w-full max-w-sm px-4 sm:px-0">
     <div
       v-for="t in toasts"
       :key="t.id"

@@ -91,9 +91,6 @@
           />
         </div>
 
-        <!-- ERROR MESSAGE -->
-        <p v-if="errorMsg" class="text-red-600 text-sm">{{ errorMsg }}</p>
-
         <!-- ACTIONS -->
         <div class="flex justify-end space-x-3 pt-2">
           <button
@@ -130,6 +127,7 @@
 import { computed, onMounted, onUnmounted, ref, watch } from "vue"
 import { createProject, updateProject } from "../services/projectService"
 import type { IProject, IProjectPayload } from "../types/types"
+import { useToast } from "../composables/useToast"
 
 const props = defineProps<{
   project?: IProject | null
@@ -143,7 +141,6 @@ const emit = defineEmits<{
 
 // STATE
 const loading = ref(false)
-const errorMsg = ref("")
 
 // FORM DATA
 const form = ref<IProjectPayload>({
@@ -192,16 +189,13 @@ watch(
       }
       tagsInput.value = ""
     }
-    errorMsg.value = ""
   },
   { immediate: true }
 )
 
 async function handleSubmit() {
-  errorMsg.value = ""
-
   if (!form.value.title.trim()) {
-    errorMsg.value = "Title cannot be empty"
+    useToast().error("Title cannot be empty")
     return
   }
 
@@ -226,10 +220,10 @@ async function handleSubmit() {
       const created = await createProject(payload)
       emit("created", created)
     }
-  } catch (err: any) {
-    const message =
-      typeof err === "string" ? err : err?.error || err?.message
-    errorMsg.value = message || "Failed to save project"
+    useToast().success(isEdit.value ? "Project updated successfully" : "Project created successfully")
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'An unexpected error occurred'
+    useToast().error(message)
   } finally {
     loading.value = false
   }

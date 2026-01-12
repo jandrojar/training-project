@@ -20,20 +20,20 @@ export async function createTaskHandler(ctx: Context) {
   // Controller validation: shape
   if (!taskData?.title) {
     ctx.status = 400;
-    ctx.body = { error: "Title is required" };
+    ctx.body = { message: "Title is required" };
     return;
   }
 
   if (typeof taskData.title !== "string") {
     ctx.status = 400;
-    ctx.body = { error: "Title must be a string" };
+    ctx.body = { message: "Title must be a string" };
     return;
   }
 
   const cleanTitle = taskData.title.trim();
   if (!cleanTitle) {
     ctx.status = 400;
-    ctx.body = { error: "Title cannot be empty" };
+    ctx.body = { message: "Title cannot be empty" };
     return;
   }
 
@@ -53,7 +53,7 @@ export async function createTaskHandler(ctx: Context) {
     ctx.body = task;
   } catch (err) {
     ctx.status = 400;
-    ctx.body = { error: (err as Error).message };
+    ctx.body = { message: (err as Error).message };
   }
 }
 
@@ -70,7 +70,7 @@ export async function getTasksHandler(ctx: Context) {
     ctx.body = tasks;
   } catch (err) {
     ctx.status = 404;
-    ctx.body = { error: (err as Error).message };
+    ctx.body = { message: (err as Error).message };
   }
 }
 
@@ -87,7 +87,7 @@ export async function getTaskHandler(ctx: Context) {
     ctx.body = task;
   } catch (err) {
     ctx.status = 404;
-    ctx.body = { error: (err as Error).message };
+    ctx.body = { message: (err as Error).message };
   }
 }
 
@@ -102,14 +102,14 @@ export async function updateTaskHandler(ctx: Context) {
   if (payload.title !== undefined) {
     if (typeof payload.title !== "string") {
       ctx.status = 400;
-      ctx.body = { error: "Title must be a string" };
+      ctx.body = { message: "Title must be a string" };
       return;
     }
 
     const clean = payload.title.trim();
     if (!clean) {
       ctx.status = 400;
-      ctx.body = { error: "Title cannot be empty" };
+      ctx.body = { message: "Title cannot be empty" };
       return;
     }
 
@@ -129,7 +129,7 @@ export async function updateTaskHandler(ctx: Context) {
     ctx.body = task;
   } catch (err) {
     ctx.status = 400;
-    ctx.body = { error: (err as Error).message };
+    ctx.body = { message: (err as Error).message };
   }
 }
 
@@ -146,7 +146,7 @@ export async function deleteTaskHandler(ctx: Context) {
     ctx.body = { success: true };
   } catch (err) {
     ctx.status = 400;
-    ctx.body = { error: (err as Error).message };
+    ctx.body = { message: (err as Error).message };
   }
 }
 
@@ -160,7 +160,7 @@ export async function updateTaskDoneHandler(ctx: Context) {
 
   if (typeof done !== "boolean") {
     ctx.status = 400;
-    ctx.body = { error: "done must be a boolean" };
+    ctx.body = { message: "done must be a boolean" };
     return;
   }
 
@@ -170,6 +170,6 @@ export async function updateTaskDoneHandler(ctx: Context) {
     ctx.body = task;
   } catch (err) {
     ctx.status = 400;
-    ctx.body = { error: (err as Error).message };
+    ctx.body = { message: (err as Error).message };
   }
 }

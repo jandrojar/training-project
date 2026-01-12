@@ -125,10 +125,6 @@
           Loading tasks...
         </div>
 
-        <div v-else-if="tasksError" class="text-sm text-red-600">
-          {{ tasksError }}
-        </div>
-
         <div v-else-if="!tasks.length" class="text-sm text-gray-400 italic">
           No tasks yet.
         </div>
@@ -238,13 +234,13 @@ import { priorityClasses, statusClasses } from "../helpers/projectBadgeClasses"
 import { formatDate, formatDateShort } from "../helpers/formatDates"
 import CreateTaskModal from "../components/CreateTaskModal.vue"
 import ConfirmDeleteModal from "../components/ConfirmDeleteModal.vue"
+import { useToast } from "../composables/useToast"
 
 const route = useRoute()
 const loading = ref(true)
 const tasksLoading = ref(true)
 const project = ref<IProject | null>(null)
 const tasks = ref<ITask[]>([])
-const tasksError = ref<string | null>(null)
 const showTaskModal = ref(false)
 const showConfirmDeleteModal = ref(false)
 const confirmDeleteTask = ref<ITask | null>(null)
@@ -255,8 +251,10 @@ onMounted(async () => {
   const id = route.params.id as string
   try {
     project.value = await getProject(id)
-  } catch {
+  } catch (err: unknown) {
     project.value = null
+    const message = err instanceof Error ? err.message : "Could not load project."
+    useToast().error(message)
   } finally {
     loading.value = false
   }
@@ -266,11 +264,11 @@ onMounted(async () => {
 
 async function loadTasks(projectId: string) {
   tasksLoading.value = true
-  tasksError.value = null
   try {
     tasks.value = await getTasks(projectId)
-  } catch (err: any) {
-    tasksError.value = err?.message || "Could not load tasks."
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Could not load tasks."
+    useToast().error(message)
   } finally {
     tasksLoading.value = false
   }
@@ -321,8 +319,9 @@ async function toggleTaskDone(task: ITask) {
     const updated = await updateTaskDone(project.value.id, task.id, !task.done)
     const idx = tasks.value.findIndex(t => t.id === task.id)
     if (idx !== -1) tasks.value.splice(idx, 1, updated)
-  } catch (err: any) {
-    tasksError.value = err?.message || "Could not update task."
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Could not update task."
+    useToast().error(message)
   } finally {
     taskActioningId.value = null
   }
@@ -335,8 +334,10 @@ async function confirmDeleteTaskAction() {
   try {
     await deleteTask(project.value.id, task.id)
     tasks.value = tasks.value.filter(t => t.id !== task.id)
-  } catch (err: any) {
-    tasksError.value = err?.message || "Could not delete task."
+    useToast().success("Task deleted successfully")
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Could not delete task."
+    useToast().error(message)
   } finally {
     taskActioningId.value = null
     closeConfirmDeleteModal()

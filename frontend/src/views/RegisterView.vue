@@ -69,7 +69,8 @@
 import { reactive } from 'vue';
 import type { IUserRegister } from '../types/types';
 import { useRouter } from 'vue-router';
-import {register} from '../services/authService'
+import { register } from '../services/authService'
+import { useToast } from '../composables/useToast'
 
 const router = useRouter();
 const user = reactive<IUserRegister>({
@@ -82,11 +83,13 @@ const user = reactive<IUserRegister>({
 
 async function handleRegister() {
   try{
-  await register(user)
-  router.push('/login')
-} catch (error: any) {
-    alert(error?.error || "Register failed")
-}
+    await register(user)
+    useToast().success('Account created. Please log in.')
+    router.push('/login')
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Register failed"
+    useToast().error(message)
+  }
 }
 
 

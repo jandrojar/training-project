@@ -11,14 +11,24 @@ export const api = axios.create({
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      
-      console.warn('Unauthorized – 401')
+    const message =
+      error?.response?.data?.message ||
+      error?.response?.data?.error ||
+      error?.message ||
+      "Request failed"
+
+    const err = new Error(message) as Error & { status?: number }
+
+    err.status = error?.response?.status
+
+    if (err.status === 401) {
+      console.warn("Unauthorized – 401")
     }
 
-    return Promise.reject(error)
+    return Promise.reject(err)
   }
 )
+
 
 api.interceptors.request.use((config) => {
   const sessionStore = useSessionStore()
