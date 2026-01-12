@@ -115,6 +115,7 @@ import { formatDateShort } from '../helpers/formatDates'
 import type { IProject } from '../types/types'
 import CreateProjectModal from '../components/CreateProjectModal.vue'
 import ConfirmDeleteModal from '../components/ConfirmDeleteModal.vue'
+import { useToast } from '../composables/useToast'
 
 const loading = ref(true)
 const projects = ref<IProject[]>([])
@@ -130,6 +131,9 @@ const router = useRouter()
 onMounted(async () => {
   try {
     projects.value = await getProjects()
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Could not load projects."
+    useToast().error(message)
   } finally {
     loading.value = false
   }
@@ -184,8 +188,10 @@ async function confirmDeleteProjectAction() {
   try {
     await deleteProject(project.id)
     projects.value = projects.value.filter(p => p.id !== project.id)
-  } catch (err: any) {
-    console.error(err)
+    useToast().success('Project deleted successfully')
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'An unexpected error occurred'
+    useToast().error(message)
   } finally {
     projectActioningId.value = null
     closeConfirmDeleteModal()

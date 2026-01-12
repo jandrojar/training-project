@@ -50,8 +50,6 @@
           />
         </div>
 
-        <p v-if="errorMsg" class="text-red-600 text-sm">{{ errorMsg }}</p>
-
         <div class="flex justify-end space-x-3 pt-2">
           <button
             type="button"
@@ -78,6 +76,7 @@
 import { computed, onMounted, onUnmounted, ref, watch } from "vue"
 import { createTask, updateTask } from "../services/taskService"
 import type { ITask, ITaskPayload } from "../types/types"
+import { useToast } from "../composables/useToast"
 
 
 const props = defineProps<{
@@ -93,7 +92,6 @@ const emit = defineEmits<{
 }>()
 
 const loading = ref(false)
-const errorMsg = ref("")
 
 // Form data
 const form = ref<ITaskPayload>({
@@ -131,16 +129,13 @@ watch(
         deadline: undefined,
       }
     }
-    errorMsg.value = ""
   },
   { immediate: true } // Run immediately on component mount
 )
 
 async function handleSubmit() {
-  errorMsg.value = ""
-
   if (!form.value.title.trim()) {
-    errorMsg.value = "Title cannot be empty"
+    useToast().error("Title cannot be empty")
     return
   }
 
@@ -160,8 +155,10 @@ async function handleSubmit() {
       const created = await createTask(props.projectId, payload)
       emit("created", created)
     }
-  } catch (err: any) {
-    errorMsg.value = err?.response?.data?.error || err?.message || "Failed to save task"
+    useToast().success(isEdit.value ? "Task updated successfully" : "Task created successfully")
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Failed to save task"
+    useToast().error(message)
   } finally {
     loading.value = false
   }
