@@ -1,5 +1,9 @@
 <template>
-  <div class="fixed top-4 right-4 z-9999 flex flex-col gap-3 w-full max-w-sm px-4 sm:px-0">
+  <TransitionGroup
+    name="toast"
+    tag="div"
+    class="fixed top-4 right-4 z-9999 flex flex-col gap-3 w-full max-w-sm px-4 sm:px-0"
+  >
     <div
       v-for="t in toasts"
       :key="t.id"
@@ -22,12 +26,13 @@
         ×
       </button>
     </div>
-  </div>
+  </TransitionGroup>
 </template>
 
 <script setup lang="ts">
-import { useToast} from "../composables/useToast"
+import { useToast } from "../composables/useToast"
 import type { ToastType } from "../types/types"
+
 const { toasts, remove } = useToast()
 
 function toastBorderClass(type: ToastType) {
@@ -37,3 +42,30 @@ function toastBorderClass(type: ToastType) {
   return "border-blue-200 bg-blue-100"
 }
 </script>
+
+<style scoped>
+.toast-enter-active,
+.toast-leave-active {
+  transition: all 0.5s ease;
+}
+
+.toast-enter-from {
+  opacity: 0;
+  transform: translateX(12px);
+}
+
+.toast-enter-to {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.toast-leave-from {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.toast-leave-to {
+  opacity: 0;
+  transform: translateX(12px);
+}
+</style>
