@@ -13,14 +13,14 @@ export async function registerHandler(ctx: Context) {
     // Basic validation
     if (!cleanName || !cleanEmail || !cleanPassword) {
         ctx.status = 400;
-        ctx.body = { error: "Missing required fields" };
+        ctx.body = { message: "Missing required fields" };
         return;
     }
 
     // Validate age type
     if (age !== undefined && typeof age !== "number") {
         ctx.status = 400;
-        ctx.body = { error: "Age must be a number" };
+        ctx.body = { message: "Age must be a number" };
         return;
     }
 
@@ -39,11 +39,11 @@ export async function registerHandler(ctx: Context) {
     } catch (err: any) {
         if (err instanceof Error) {
             ctx.status = 400;
-            ctx.body = { error: err.message };
+            ctx.body = { message: err.message };
             return;
         }
 
         ctx.status = 500;
-        ctx.body = { error: "Internal server error" };
+        ctx.body = { message: "Internal server error" };
     }
 }

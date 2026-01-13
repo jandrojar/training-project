@@ -6,7 +6,7 @@ export async function loginHandler(ctx: Context) {
 
     if(!email || !password){
         ctx.status=400
-        ctx.body={error:'Missing credentials'}
+        ctx.body={message:'Missing credentials'}
         return
     }
 
@@ -20,13 +20,13 @@ export async function loginHandler(ctx: Context) {
         // Invalid credentials
         if (err.message === "Invalid credentials") {
             ctx.status = 401;
-            ctx.body = { error: "Invalid credentials" };
+            ctx.body = { message: "Invalid credentials" };
             return;
         }
 
         // Unexpected error
         ctx.status = 500;
-        ctx.body = { error: "Internal server error" };
+        ctx.body = { message: "Internal server error" };
     }
 }
 
@@ -35,7 +35,7 @@ export async function logoutHandler(ctx: Context) {
 
   if (!rawAuth || typeof rawAuth !== "string" || !rawAuth.startsWith("Bearer ")) {
     ctx.status = 400
-    ctx.body = { error: "Missing or invalid authorization header" }
+    ctx.body = { message: "Missing or invalid authorization header" }
     return
   }
 
@@ -47,6 +47,6 @@ export async function logoutHandler(ctx: Context) {
     ctx.body = { success: true }
   } catch (err) {
     ctx.status = 500
-    ctx.body = { error: "Internal server error" }
+    ctx.body = { message: "Internal server error" }
   }
 }

@@ -44,6 +44,7 @@ import { useRouter } from 'vue-router'
 import { login } from '../services/authService'
 import { useSessionStore } from '../stores/session'
 import type { IUserLogin } from '../types/types'
+import { useToast } from '../composables/useToast'
 
 const user = reactive<IUserLogin>({
   email: '',
@@ -60,8 +61,9 @@ async function handleLogin() {
     sessionStore.setSession(response)
 
     router.push('/app/dashboard')
-  } catch (error: any) {
-    alert(error?.error || "Login failed")
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'An unexpected error occurred'
+    useToast().error(message)
   }
 }
 </script>
