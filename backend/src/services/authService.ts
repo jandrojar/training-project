@@ -1,10 +1,10 @@
 import UserRepository from "../repositories/UserRepository";
 import SessionRepository from "../repositories/SessionRepository";
 import bcrypt from "bcrypt";
+import { SESSION_TTL_MS } from "../config/auth";
 
 const userRepo = new UserRepository();
 const sessionRepo = new SessionRepository();
-
 export async function login(email: string, password: string) {
     const user = await userRepo.findByEmail(email);
     if(!user){
@@ -17,7 +17,7 @@ export async function login(email: string, password: string) {
         throw new Error("Invalid credentials");
     }
 
-    const expiresAt = new Date(Date.now() + 1000 * 60 * 60); // 1 hour
+    const expiresAt = new Date(Date.now() + SESSION_TTL_MS); // 1 week
 
     const session = await sessionRepo.createSession(user.id, expiresAt);
 

@@ -77,7 +77,7 @@ import { computed, onMounted, onUnmounted, ref, watch } from "vue"
 import { createTask, updateTask } from "../services/taskService"
 import type { ITask, ITaskPayload } from "../types/types"
 import { useToast } from "../composables/useToast"
-
+import { isHandledError } from "../helpers/isHandledError"
 
 const props = defineProps<{
   projectId: string
@@ -157,8 +157,10 @@ async function handleSubmit() {
     }
     useToast().success(isEdit.value ? "Task updated successfully" : "Task created successfully")
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "Failed to save task"
-    useToast().error(message)
+    if (!isHandledError(err)) {
+      const message = err instanceof Error ? err.message : "Failed to save task"
+      useToast().error(message)
+    }
   } finally {
     loading.value = false
   }

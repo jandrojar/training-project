@@ -1,7 +1,9 @@
 import { Context, Next } from "koa";
 import SessionRepository from "../repositories/SessionRepository";
+import { SESSION_TTL_MS, RENEW_WINDOW_MS } from "../config/auth";
 
 const sessionRepo = new SessionRepository();
+
 
 export async function authMiddleware(ctx: Context, next: Next) {
   const rawAuth = ctx.headers["authorization"];
@@ -29,6 +31,15 @@ export async function authMiddleware(ctx: Context, next: Next) {
     return;
   }
 
+  const msLeft = session.expiresAt.getTime() - now.getTime();
+  if (msLeft <= RENEW_WINDOW_MS) {
+    // Renew session
+    const newExpiresAt = new Date(now.getTime() + SESSION_TTL_MS);
+    await sessionRepo.updateSessionExpiry(sessionId, newExpiresAt);
+    session.expiresAt = newExpiresAt; // Update local session object
+  }
+
+  //  Attach userId to context state for downstream handlers
   ctx.state.userId = session.userId;
 
   await next();

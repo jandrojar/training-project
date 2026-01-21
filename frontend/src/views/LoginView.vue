@@ -45,6 +45,7 @@ import { login } from '../services/authService'
 import { useSessionStore } from '../stores/session'
 import type { IUserLogin } from '../types/types'
 import { useToast } from '../composables/useToast'
+import { isHandledError } from '../helpers/isHandledError'
 
 const user = reactive<IUserLogin>({
   email: '',
@@ -62,8 +63,10 @@ async function handleLogin() {
 
     router.push('/app/dashboard')
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'An unexpected error occurred'
-    useToast().error(message)
+    if (!isHandledError(error)) {
+      const message = error instanceof Error ? error.message : 'An unexpected error occurred'
+      useToast().error(message)
+    }
   }
 }
 </script>
