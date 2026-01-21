@@ -235,6 +235,7 @@ import { formatDate, formatDateShort } from "../helpers/formatDates"
 import CreateTaskModal from "../components/CreateTaskModal.vue"
 import ConfirmDeleteModal from "../components/ConfirmDeleteModal.vue"
 import { useToast } from "../composables/useToast"
+import { isHandledError } from "../helpers/isHandledError"
 
 const route = useRoute()
 const loading = ref(true)
@@ -253,8 +254,10 @@ onMounted(async () => {
     project.value = await getProject(id)
   } catch (err: unknown) {
     project.value = null
-    const message = err instanceof Error ? err.message : "Could not load project."
-    useToast().error(message)
+    if (!isHandledError(err)) {
+      const message = err instanceof Error ? err.message : "Could not load project."
+      useToast().error(message)
+    }
   } finally {
     loading.value = false
   }
@@ -267,8 +270,10 @@ async function loadTasks(projectId: string) {
   try {
     tasks.value = await getTasks(projectId)
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "Could not load tasks."
-    useToast().error(message)
+    if (!isHandledError(err)) {
+      const message = err instanceof Error ? err.message : "Could not load tasks."
+      useToast().error(message)
+    }
   } finally {
     tasksLoading.value = false
   }
@@ -320,8 +325,10 @@ async function toggleTaskDone(task: ITask) {
     const idx = tasks.value.findIndex(t => t.id === task.id)
     if (idx !== -1) tasks.value.splice(idx, 1, updated)
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "Could not update task."
-    useToast().error(message)
+    if (!isHandledError(err)) {
+      const message = err instanceof Error ? err.message : "Could not update task."
+      useToast().error(message)
+    }
   } finally {
     taskActioningId.value = null
   }
@@ -336,8 +343,10 @@ async function confirmDeleteTaskAction() {
     tasks.value = tasks.value.filter(t => t.id !== task.id)
     useToast().success("Task deleted successfully")
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "Could not delete task."
-    useToast().error(message)
+    if (!isHandledError(err)) {
+      const message = err instanceof Error ? err.message : "Could not delete task."
+      useToast().error(message)
+    }
   } finally {
     taskActioningId.value = null
     closeConfirmDeleteModal()

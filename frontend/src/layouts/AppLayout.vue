@@ -24,6 +24,7 @@ import { useRouter } from 'vue-router';
 import { logout } from '../services/authService';
 import { useSessionStore } from '../stores/session';
 import { useToast } from '../composables/useToast';
+import { isHandledError } from '../helpers/isHandledError';
 
 const router = useRouter();
 const session = useSessionStore();
@@ -35,8 +36,10 @@ async function handleLogout() {
     useToast().success("Logged out successfully")
     router.push('/login');
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Logout failed"
-    useToast().error(message)
+    if (!isHandledError(error)) {
+      const message = error instanceof Error ? error.message : "Logout failed"
+      useToast().error(message)
+    }
   }
   
 }

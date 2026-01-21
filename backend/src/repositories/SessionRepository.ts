@@ -26,5 +26,12 @@ export default class SessionPrismaRepository {
         
     }    
 
+    async updateSessionExpiry(id:string, newExpiresAt:Date){    
+        return prisma.session.update({
+            where:{id},
+            data:{expiresAt:newExpiresAt},
+        });
+    }
+
 
 }

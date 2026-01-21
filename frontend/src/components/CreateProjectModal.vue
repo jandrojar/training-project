@@ -128,6 +128,7 @@ import { computed, onMounted, onUnmounted, ref, watch } from "vue"
 import { createProject, updateProject } from "../services/projectService"
 import type { IProject, IProjectPayload } from "../types/types"
 import { useToast } from "../composables/useToast"
+import { isHandledError } from "../helpers/isHandledError"
 
 const props = defineProps<{
   project?: IProject | null
@@ -222,8 +223,10 @@ async function handleSubmit() {
     }
     useToast().success(isEdit.value ? "Project updated successfully" : "Project created successfully")
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'An unexpected error occurred'
-    useToast().error(message)
+    if (!isHandledError(error)) {
+      const message = error instanceof Error ? error.message : "An unexpected error occurred"
+      useToast().error(message)
+    }
   } finally {
     loading.value = false
   }
