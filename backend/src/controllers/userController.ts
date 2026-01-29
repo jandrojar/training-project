@@ -1,6 +1,6 @@
 import { Context } from "koa";
-import { registerUser } from "../services/userService";
-import type { UserRegister } from "../types/User";
+import { registerUser, getUserById, updateUser } from "../services/userService";
+import type { UserRegister, UserUpdate } from "../types/User";
 
 export async function registerHandler(ctx: Context) {
     const { name, lastname, age, email, password } = ctx.request.body as UserRegister;
@@ -45,5 +45,77 @@ export async function registerHandler(ctx: Context) {
 
         ctx.status = 500;
         ctx.body = { message: "Internal server error" };
+    }
+}
+
+export async function getCurrentUserHandler(ctx: Context) {
+    const userId = ctx.state.userId;
+
+    if (!userId) {
+        ctx.status = 401;
+        ctx.body = { message: "Unauthorized" };
+        return;
+    }
+
+    try {
+        const user = await getUserById(userId);
+
+        if (!user) {
+            ctx.status = 404;
+            ctx.body = { message: "User not found" };
+            return;
+        }
+
+        ctx.status = 200;
+        ctx.body = user;
+
+    } catch (err: any) {
+        ctx.status = 500;
+        ctx.body = { message: "Internal server error" };
+    }
+}
+
+export async function updateCurrentUserHandler(ctx: Context) {
+    const userId = ctx.state.userId;
+
+    if (!userId) {
+        ctx.status = 401;
+        ctx.body = { message: "Unauthorized" };
+        return;
+    }
+
+    const { name, lastname, age, email } = ctx.request.body as Partial<UserUpdate>;
+
+    const cleanName = name?.trim();
+    const cleanEmail = email?.trim();
+    const cleanLastname = lastname && lastname.trim() !== "" ? lastname.trim() : undefined;
+
+    // Validate age type
+    if (age !== undefined && typeof age !== "number") {
+        ctx.status = 400;
+        ctx.body = { message: "Age must be a number" };
+        return;
+    }
+
+    const data: UserUpdate = {};
+    if (cleanName !== undefined) data.name = cleanName;
+    if (cleanLastname !== undefined) data.lastname = cleanLastname;
+    if (age !== undefined) data.age = age;
+    if (cleanEmail !== undefined) data.email = cleanEmail;
+
+    try {
+        const updatedUser = await updateUser(userId, data);
+        ctx.status = 200;
+        ctx.body = updatedUser;
+    } catch (err: any) {
+
+        if (err instanceof Error) {
+            ctx.status = 400;
+            ctx.body = { message: err.message };
+            return;
+        }
+
+    ctx.status = 500;
+    ctx.body = { message: "Internal server error" };
     }
 }

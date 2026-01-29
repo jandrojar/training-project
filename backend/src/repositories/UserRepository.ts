@@ -1,4 +1,5 @@
 import prisma from '../services/prisma';
+import type { UserCreateInput, UserUpdateInput, UserPasswordUpdateInput } from '../types/User';
 
 export default class UserPrismaRepository {
 	async findAll() {
@@ -17,23 +18,11 @@ export default class UserPrismaRepository {
         })
     }
 
-    async create(data: {
-        name: string;
-        lastname?: string | null;
-        age?: number | null;
-        email: string;
-        password: string;
-        }) {
+    async create(data: UserCreateInput) {
         return prisma.user.create({ data})
     }
 
-    async update(id: string, data: Partial<{
-    name: string;
-    lastname?: string | null;
-    age: number;
-    email: string;
-    password: string;
-    }>) {
+    async update(id: string, data: UserUpdateInput) {
         return prisma.user.update({
         where: { id },
         data,
@@ -43,6 +32,13 @@ export default class UserPrismaRepository {
     async delete(id: string) {
         return prisma.user.delete({
         where: { id },
+        });
+    }
+
+    async updatePassword(id: string, data: UserPasswordUpdateInput) {
+        return prisma.user.update({
+        where: { id },
+        data,
         });
     }
 }
