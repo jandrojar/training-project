@@ -23,7 +23,7 @@ export async function registerUser(user: UserRegister): Promise<UserDTO> {
         throw new Error("This input field cannot exceed 50 characters");
     }
 
-    if (user.age !== undefined && (user.age < 18 || user.age >= 120)) {
+    if (user.age !== undefined && user.age !== null && (user.age < 18 || user.age >= 120)) {
         throw new Error("Age must be between 18 and 120 years old");
     }
 
@@ -78,7 +78,7 @@ export async function updateUser(userId: string, user: UserUpdate): Promise<User
         throw new Error("This input field cannot exceed 50 characters");
     }
     
-    if (user.age !== undefined && (user.age < 18 || user.age >= 120)) {
+    if (user.age !== undefined && user.age !== null && (user.age < 18 || user.age >= 120)) {
         throw new Error("Age must be between 18 and 120 years old");
     }
 

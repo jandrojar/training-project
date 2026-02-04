@@ -16,8 +16,8 @@ export interface UserDTO {
 
 export interface UserUpdate {
   name?: string;
-  lastname?: string;
-  age?: number;
+  lastname?: string | null;
+  age?: number | null;
   email?: string;
 }
 
@@ -31,8 +31,8 @@ export type UserCreateInput = {
 
 export type UserUpdateInput = {
   name?: string;
-  lastname?: string;
-  age?: number;
+  lastname?: string | null;
+  age?: number | null;
   email?: string;
 }
 

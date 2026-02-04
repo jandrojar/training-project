@@ -84,14 +84,35 @@ export async function updateCurrentUserHandler(ctx: Context) {
         return;
     }
 
-    const { name, lastname, age, email } = ctx.request.body as Partial<UserUpdate>;
+    const body = ctx.request.body as Partial<UserUpdate>;
+    const { name, lastname, age, email } = body;
 
     const cleanName = name?.trim();
     const cleanEmail = email?.trim();
-    const cleanLastname = lastname && lastname.trim() !== "" ? lastname.trim() : undefined;
+    const hasLastname = Object.prototype.hasOwnProperty.call(body, "lastname");
+    const hasAge = Object.prototype.hasOwnProperty.call(body, "age");
+
+    // Require non-empty name/email if provided
+    if (name !== undefined && !cleanName) {
+        ctx.status = 400;
+        ctx.body = { message: "Name cannot be empty" };
+        return;
+    }
+
+    if (email !== undefined && !cleanEmail) {
+        ctx.status = 400;
+        ctx.body = { message: "Email cannot be empty" };
+        return;
+    }
+
+    if (lastname !== undefined && lastname !== null && typeof lastname !== "string") {
+        ctx.status = 400;
+        ctx.body = { message: "Lastname must be a string" };
+        return;
+    }
 
     // Validate age type
-    if (age !== undefined && typeof age !== "number") {
+    if (age !== undefined && age !== null && typeof age !== "number") {
         ctx.status = 400;
         ctx.body = { message: "Age must be a number" };
         return;
@@ -99,8 +120,14 @@ export async function updateCurrentUserHandler(ctx: Context) {
 
     const data: UserUpdate = {};
     if (cleanName !== undefined) data.name = cleanName;
-    if (cleanLastname !== undefined) data.lastname = cleanLastname;
-    if (age !== undefined) data.age = age;
+    if (hasLastname) {
+        if (typeof lastname === "string" && lastname.trim() !== "") {
+            data.lastname = lastname.trim();
+        } else {
+            data.lastname = null;
+        }
+    }
+    if (hasAge) data.age = age === null ? null : age;
     if (cleanEmail !== undefined) data.email = cleanEmail;
 
     try {

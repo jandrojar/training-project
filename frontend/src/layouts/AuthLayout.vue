@@ -44,14 +44,12 @@
 </template>
 <script setup lang="ts">
 import { useRouter, useRoute } from 'vue-router';
-import { getCurrentUser } from '../services/userService';
 
 
 
 const route = useRoute();
 const router = useRouter();
 
-console.log(getCurrentUser());
 
 function toLogin() {
   router.push('/login');
