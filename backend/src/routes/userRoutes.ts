@@ -1,5 +1,5 @@
 import Router from "@koa/router";
-import {registerHandler, getCurrentUserHandler, updateCurrentUserHandler} from "../controllers/userController";
+import {registerHandler, getCurrentUserHandler, updateCurrentUserHandler, updatePasswordHandler} from "../controllers/userController";
 import { authMiddleware } from "../middleware/authMiddleware";
 
 const userRouter = new Router({
@@ -9,6 +9,7 @@ const userRouter = new Router({
 userRouter.post("/register", registerHandler);
 userRouter.get("/me", authMiddleware, getCurrentUserHandler);
 userRouter.patch("/me", authMiddleware, updateCurrentUserHandler);
+userRouter.patch("/me/password", authMiddleware, updatePasswordHandler);
 
 export default userRouter;
 

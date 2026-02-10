@@ -1,5 +1,5 @@
 import { Context } from "koa";
-import { registerUser, getUserById, updateUser } from "../services/userService";
+import { registerUser, getUserById, updateUser, updateUserPassword } from "../services/userService";
 import type { UserRegister, UserUpdate } from "../types/User";
 
 export async function registerHandler(ctx: Context) {
@@ -146,3 +146,45 @@ export async function updateCurrentUserHandler(ctx: Context) {
     ctx.body = { message: "Internal server error" };
     }
 }
+
+export async function updatePasswordHandler(ctx: Context) {
+    const userId = ctx.state.userId;
+
+    if (!userId) {
+        ctx.status = 401;
+        ctx.body = { message: "Unauthorized" };
+        return;
+    }
+
+    const { currentPassword, newPassword } = ctx.request.body as { currentPassword: string; newPassword: string };
+
+    if(typeof currentPassword !== "string" || typeof newPassword !== "string") {
+        ctx.status = 400;
+        ctx.body = { message: "Passwords must be strings" };
+        return;
+    }
+
+    const cleanCurrentPassword = currentPassword?.trim();
+    const cleanNewPassword = newPassword?.trim();
+
+    if (!cleanCurrentPassword || !cleanNewPassword) {
+        ctx.status = 400;
+        ctx.body = { message: "Missing required fields" };
+        return;
+    }
+
+
+    try {
+        await updateUserPassword(userId, cleanCurrentPassword, cleanNewPassword);
+        ctx.status = 200;
+        ctx.body = { message: "Password updated successfully" };
+    } catch (err: any) {
+        if (err instanceof Error) {
+            ctx.status = 400;
+            ctx.body = { message: err.message };
+            return;
+        }
+        ctx.status = 500;
+        ctx.body = { message: "Internal server error" };
+    } 
+}  

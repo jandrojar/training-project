@@ -32,6 +32,11 @@ export interface IUserUpdate{
     email?:string
 }
 
+export interface IUserPasswordUpdate{
+    currentPassword: string,
+    newPassword: string
+}
+
 export type ProjectStatus = 'PLANNED' | 'IN_PROGRESS' | 'COMPLETED' | 'ON_HOLD'
 export type ProjectPriority = 'LOW' | 'MEDIUM' | 'HIGH'
 

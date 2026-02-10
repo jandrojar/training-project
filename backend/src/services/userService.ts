@@ -1,6 +1,6 @@
 import UserRepository from "../repositories/UserRepository";
 import bcrypt from "bcrypt";
-import type { UserRegister, UserDTO, UserUpdate } from "../types/User";
+import type { UserRegister, UserDTO, UserUpdate, UserPasswordUpdateInput } from "../types/User";
 
 const userRepo = new UserRepository();
 
@@ -83,7 +83,7 @@ export async function updateUser(userId: string, user: UserUpdate): Promise<User
     }
 
     const updatedUser = await userRepo.update(userId, user);
-
+                                                                                                                                    
     return {
         id: updatedUser.id,
         name: updatedUser.name,
@@ -91,5 +91,32 @@ export async function updateUser(userId: string, user: UserUpdate): Promise<User
         age: updatedUser.age ?? undefined,
         email: updatedUser.email
     };
+    
+}
+
+export async function updateUserPassword(userId: string, currentPassword: string, newPassword: string): Promise<void> {
+    if (newPassword.length < 6) {
+        throw new Error("New password must be at least 6 characters long");
+    }
+
+    const user = await userRepo.findById(userId);
+    if (!user) {
+        throw new Error("User not found");
+    }
+
+    const passwordMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!passwordMatch) {
+        throw new Error("Current password is incorrect");
+    }
+
+    if (currentPassword === newPassword) {
+        throw new Error("New password cannot be the same as the current password");
+    }
+
+    const payload: UserPasswordUpdateInput = {
+        password: await bcrypt.hash(newPassword, 10)
+    };
+
+    await userRepo.updatePassword(userId, payload);
     
 }
