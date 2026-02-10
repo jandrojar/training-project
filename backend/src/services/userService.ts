@@ -120,3 +120,7 @@ export async function updateUserPassword(userId: string, currentPassword: string
     await userRepo.updatePassword(userId, payload);
     
 }
+
+export async function deleteUser(userId: string): Promise<void> {
+    await userRepo.delete(userId);
+}

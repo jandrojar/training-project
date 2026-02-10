@@ -1,46 +1,47 @@
 <template>
-    <div class="bg-gray-50 py-10 px-4">
-        <div class="max-w-5xl mx-auto">
-            <h1 class="text-3xl font-bold mb-10 text-center">User Settings</h1>
+    <div class="space-y-6 max-w-5xl mx-auto">
+        <div>
+            <p class="text-sm uppercase tracking-wide text-gray-400">Settings</p>
+            <h1 class="text-3xl font-bold text-gray-900">User Settings</h1>
         </div>
-        <div class="max-w-5xl mx-auto flex flex-col md:flex-row justify-center items-start gap-6 md:gap-10">
-        <div class="w-full max-w-md p-6 bg-white rounded-xl shadow">
-            <h2 class="text-2xl font-bold mb-6 text-center">Update Profile</h2>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="w-full p-6 bg-white rounded-xl shadow-sm border border-gray-100">
+            <h2 class="text-2xl font-bold mb-6 text-gray-900">Update Profile</h2>
             <div v-if="loading" class="text-center text-gray-600">Loading...</div>
             <form v-else class="space-y-4" @submit.prevent="updateUser">
                 <div>
-                    <label class="block text-gray-700 font-semibold mb-2" for="name">Name:</label>
-                    <input v-model="form.name" id="name" type="text" required class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400" />
+                    <label class="block text-gray-700 font-semibold mb-2" for="name">Name</label>
+                    <input v-model="form.name" id="name" type="text" required class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400" />
                 </div>
                 <div>
-                    <label class="block text-gray-700 font-semibold mb-2" for="lastname">Last Name:</label>
-                    <input v-model="form.lastname" id="lastname" type="text" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400" />
+                    <label class="block text-gray-700 font-semibold mb-2" for="lastname">Last Name</label>
+                    <input v-model="form.lastname" id="lastname" type="text" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400" />
                 </div>
                 <div>
-                    <label class="block text-gray-700 font-semibold mb-2" for="age">Age:</label>
-                    <input v-model.number="form.age" id="age" type="number" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400" />
+                    <label class="block text-gray-700 font-semibold mb-2" for="age">Age</label>
+                    <input v-model.number="form.age" id="age" type="number" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400" />
                 </div>
                 <div>
-                    <label class="block text-gray-700 font-semibold mb-2" for="email">Email:</label>
-                    <input v-model="form.email" id="email" type="email" required class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400" />
+                    <label class="block text-gray-700 font-semibold mb-2" for="email">Email</label>
+                    <input v-model="form.email" id="email" type="email" required class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400" />
                 </div>
-                <button type="submit" :disabled="!hasChanges" class="w-full py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition cursor-pointer disabled:opacity-50">
+                <button type="submit" :disabled="!hasChanges" class="w-full px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition cursor-pointer disabled:opacity-50">
                     Update Profile
                 </button>
             </form>
         </div>
-        <div  class="w-full max-w-md p-6 bg-white rounded-xl shadow">
-            <h2 class="text-2xl font-bold mb-6 text-center">Change Password</h2>
+        <div class="w-full p-6 bg-white rounded-xl shadow-sm border border-gray-100">
+            <h2 class="text-2xl font-bold mb-6 text-gray-900">Change Password</h2>
             <form class="space-y-4" @submit.prevent="updateUserPassword">
                 <div>
-                    <label class="block text-gray-700 font-semibold mb-2" for="currentPassword">Current Password:</label>
+                    <label class="block text-gray-700 font-semibold mb-2" for="currentPassword">Current Password</label>
                     <div class="relative">
                         <input
                             v-model="passwordForm.currentPassword"
                             id="currentPassword"
                             :type="showCurrentPassword ? 'text' : 'password'"
                             required
-                            class="w-full px-3 py-2 pr-16 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400"
+                            class="w-full px-3 py-2 pr-16 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400"
                         />
                         <button
                             type="button"
@@ -75,14 +76,14 @@
                     </div>
                 </div>
                 <div>
-                    <label class="block text-gray-700 font-semibold mb-2" for="newPassword">New Password:</label>
+                    <label class="block text-gray-700 font-semibold mb-2" for="newPassword">New Password</label>
                     <div class="relative">
                         <input
                             v-model="passwordForm.newPassword"
                             id="newPassword"
                             :type="showNewPassword ? 'text' : 'password'"
                             required
-                            class="w-full px-3 py-2 pr-16 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400"
+                            class="w-full px-3 py-2 pr-16 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400"
                         />
                         <button
                             type="button"
@@ -117,14 +118,14 @@
                     </div>
                 </div>
                 <div>
-                    <label class="block text-gray-700 font-semibold mb-2" for="confirmPassword">Confirm New Password:</label>
+                    <label class="block text-gray-700 font-semibold mb-2" for="confirmPassword">Confirm New Password</label>
                     <div class="relative">
                         <input
                             v-model="passwordForm.confirmPassword"
                             id="confirmPassword"
                             :type="showConfirmPassword ? 'text' : 'password'"
                             required
-                            class="w-full px-3 py-2 pr-16 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400"
+                            class="w-full px-3 py-2 pr-16 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400"
                         />
                         <button
                             type="button"
@@ -158,21 +159,50 @@
                         </button>
                     </div>
                 </div>
-                <button type="submit" class="w-full py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition cursor-pointer ">
+                <button type="submit" class="w-full px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition cursor-pointer">
                     Update Password
                 </button>
             </form>
         </div>
         </div>
+
+        <div class="p-6 bg-white rounded-xl shadow-sm border border-red-100 space-y-4">
+            <div>
+                <p class="text-sm uppercase tracking-wide text-red-500">Danger Zone</p>
+                <h2 class="text-2xl font-bold text-gray-900">Delete Account</h2>
+                <p class="text-sm text-gray-600 mt-1">
+                    This will permanently remove your account and related data.
+                </p>
+            </div>
+            <button
+                @click="showConfirmDeleteModal = true"
+                class="w-full sm:w-auto px-4 py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition cursor-pointer shadow-sm"
+            >
+                Delete Account
+            </button>
+        </div>
+
+        <ConfirmDeleteModal
+            v-if="showConfirmDeleteModal"
+            entityLabel="account"
+            title="Delete account"
+            description="Are you sure you want to delete your account? This action cannot be undone."
+            confirmLabel="Delete"
+            @close="closeConfirmDeleteModal"
+            @confirm="confirmDeleteUserAction"
+        />
     </div>
 </template>
 <script setup lang="ts">
 import { ref, onMounted, reactive, computed } from 'vue';
-import { getCurrentUser, updateCurrentUser, updateCurrentUserPassword } from '../services/userService';
+import { getCurrentUser, updateCurrentUser, updateCurrentUserPassword, deleteCurrentUser } from '../services/userService';
 import type { IUser, IUserUpdate, IUserPasswordUpdate } from '../types/types';
 import { useToast } from '../composables/useToast';
 import { isHandledError } from '../helpers/isHandledError';
 import { useUserStore } from '../stores/user';
+import { useSessionStore } from '../stores/session';
+import { useRouter } from 'vue-router';
+import ConfirmDeleteModal from '../components/ConfirmDeleteModal.vue';
 
 const loading = ref(true);
 const form = reactive<{
@@ -197,13 +227,16 @@ const showCurrentPassword = ref(false);
 const showNewPassword = ref(false);
 const showConfirmPassword = ref(false);
 
+const showConfirmDeleteModal = ref(false);
+
 const userStore = useUserStore();
+const sessionStore = useSessionStore();
+
+const router = useRouter();
 
 function normalizeAge(value: unknown): number | null {
     return typeof value === "number" && !Number.isNaN(value) ? value : null;
 }
-
-
 
 onMounted(async () => {
     try {
@@ -293,5 +326,26 @@ async function updateUserPassword() {
             useToast().error(message)
         }
     }
+}
+
+async function confirmDeleteUserAction() {
+    try {
+        await deleteCurrentUser();
+        useToast().success("Account deleted successfully");
+        userStore.clearCurrentUser();
+        sessionStore.clearSession();
+        router.push('/');
+    } catch (error: unknown) {
+        if (!isHandledError(error)) {
+            const message = error instanceof Error ? error.message : "Failed to delete account"
+            useToast().error(message)
+        }
+    } finally {
+        closeConfirmDeleteModal();
+    }
+}
+
+function closeConfirmDeleteModal() {
+    showConfirmDeleteModal.value = false;
 }
 </script>

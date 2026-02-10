@@ -15,3 +15,7 @@ export async function updateCurrentUserPassword(payload: IUserPasswordUpdate): P
     const res = await api.patch('/users/me/password', payload);
     return res.data;
 }
+
+export async function deleteCurrentUser(): Promise<void> {
+    await api.delete('/users/me')
+}

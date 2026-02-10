@@ -1,5 +1,5 @@
 import { Context } from "koa";
-import { registerUser, getUserById, updateUser, updateUserPassword } from "../services/userService";
+import { registerUser, getUserById, updateUser, updateUserPassword, deleteUser } from "../services/userService";
 import type { UserRegister, UserUpdate } from "../types/User";
 
 export async function registerHandler(ctx: Context) {
@@ -164,7 +164,7 @@ export async function updatePasswordHandler(ctx: Context) {
         return;
     }
 
-    const cleanCurrentPassword = currentPassword?.trim();
+    const cleanCurrentPassword = currentPassword.trim();
     const cleanNewPassword = newPassword?.trim();
 
     if (!cleanCurrentPassword || !cleanNewPassword) {
@@ -188,3 +188,21 @@ export async function updatePasswordHandler(ctx: Context) {
         ctx.body = { message: "Internal server error" };
     } 
 }  
+
+export async function deleteCurrentUserHandler(ctx: Context) {
+    const userId = ctx.state.userId;
+
+    if (!userId) {
+        ctx.status = 401;
+        ctx.body = { message: "Unauthorized" };
+        return;
+    }
+
+    try {
+        await deleteUser(userId);
+        ctx.status = 204;
+    } catch (err: any) {
+        ctx.status = 500;
+        ctx.body = { message: "Internal server error" };
+    }
+}
