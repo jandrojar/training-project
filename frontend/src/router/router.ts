@@ -23,7 +23,9 @@ const routes = [
     meta: { requiresAuth: true },
     children: [
       { path: 'dashboard', name: 'dashboard', component: DashboardView },
-      { path: 'projects/:id', name: 'project', component: () => import('../views/ProjectDetailView.vue')} // Lazy load project detail view. THis is to optimize initial load time of app layout
+      { path: 'projects/:id', name: 'project', component: () => import('../views/ProjectDetailView.vue')}, // Lazy load project detail view. THis is to optimize initial load time of app layout
+      { path: 'profile', name: 'profile', component: () => import('../views/UserProfileView.vue') }
+
     ]
   }
 ]

@@ -71,6 +71,7 @@ import type { IUserRegister } from '../types/types';
 import { useRouter } from 'vue-router';
 import { register } from '../services/authService'
 import { useToast } from '../composables/useToast'
+import { isHandledError } from '../helpers/isHandledError'
 
 const router = useRouter();
 const user = reactive<IUserRegister>({
@@ -87,8 +88,10 @@ async function handleRegister() {
     useToast().success('Account created. Please log in.')
     router.push('/login')
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Register failed"
-    useToast().error(message)
+    if (!isHandledError(error)) {
+      const message = error instanceof Error ? error.message : "Register failed"
+      useToast().error(message)
+    }
   }
 }
 

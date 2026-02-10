@@ -127,6 +127,12 @@ CORS_ORIGIN=http://localhost:5173 npm run start
 
 ---
 
+## Session Handling
+- **Backend**: sliding expiration configured in `backend/src/config/auth.ts` (`SESSION_TTL_MS`, `RENEW_WINDOW_MS`) and renewed on authenticated requests.
+- **Frontend**: global 401 handling in `frontend/src/services/api.ts` clears session and redirects to login; views skip duplicate toasts via `frontend/src/helpers/isHandledError.ts`.
+
+---
+
 ## File Map (containers)
 - Dev compose: `docker-compose.yml`
 - Prod compose: `docker-compose.prod.yml`

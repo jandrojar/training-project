@@ -116,6 +116,7 @@ import type { IProject } from '../types/types'
 import CreateProjectModal from '../components/CreateProjectModal.vue'
 import ConfirmDeleteModal from '../components/ConfirmDeleteModal.vue'
 import { useToast } from '../composables/useToast'
+import { isHandledError } from '../helpers/isHandledError'
 
 const loading = ref(true)
 const projects = ref<IProject[]>([])
@@ -132,8 +133,10 @@ onMounted(async () => {
   try {
     projects.value = await getProjects()
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "Could not load projects."
-    useToast().error(message)
+    if (!isHandledError(err)) {
+      const message = err instanceof Error ? err.message : 'Could not load projects.'
+      useToast().error(message)
+    }
   } finally {
     loading.value = false
   }
@@ -190,8 +193,10 @@ async function confirmDeleteProjectAction() {
     projects.value = projects.value.filter(p => p.id !== project.id)
     useToast().success('Project deleted successfully')
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : 'An unexpected error occurred'
-    useToast().error(message)
+    if (!isHandledError(err)) {
+      const message = err instanceof Error ? err.message : 'An unexpected error occurred'
+      useToast().error(message)
+    }
   } finally {
     projectActioningId.value = null
     closeConfirmDeleteModal()
