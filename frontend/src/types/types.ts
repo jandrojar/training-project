@@ -17,12 +17,24 @@ export interface IAuthResponse {
     userId: string
 }
 
-export interface IUserRegisterResponse{
+export interface IUser{
     id: string,
     name:string,
     lastname?:string,
     age?:number,
     email:string
+}
+
+export interface IUserUpdate{
+    name?:string,
+    lastname?:string,
+    age?:number | null,
+    email?:string
+}
+
+export interface IUserPasswordUpdate{
+    currentPassword: string,
+    newPassword: string
 }
 
 export type ProjectStatus = 'PLANNED' | 'IN_PROGRESS' | 'COMPLETED' | 'ON_HOLD'
