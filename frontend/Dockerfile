@@ -1,38 +1,33 @@
-# ------------------------------------------------------
-# Build stage (Node + Vite)
-# ------------------------------------------------------
-FROM node:20-alpine AS build-stage
+# syntax=docker/dockerfile:1
+# Multi-stage build. Targets:
+#   dev     -> Vite dev server used by docker-compose.override.yml
+#   runtime -> nginx serving the built assets + /api proxy (docker-compose.prod.yml)
 
+FROM node:20-alpine AS deps
 WORKDIR /app
-
-# Install dependencies (cached layer)
 COPY package*.json ./
 RUN npm ci
 
-# Copy application source code
+# --- Development image (source is bind-mounted over this by compose) ---
+FROM node:20-alpine AS dev
+WORKDIR /app
+ENV NODE_ENV=development
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+EXPOSE 5173
+CMD ["npm", "run", "dev"]
 
-# Optional build-time variable (kept for flexibility)
+# --- Build the static bundle ---
+FROM deps AS build
+WORKDIR /app
+COPY . .
 ARG VITE_API_URL=/api
 ENV VITE_API_URL=$VITE_API_URL
-
-# Build the production-ready frontend
 RUN npm run build
 
-
-# ------------------------------------------------------
-# Production stage (Nginx serving static assets + reverse proxy)
-# ------------------------------------------------------
-FROM nginx:alpine
-
-# Replace default Nginx config with our custom one
+# --- Production runtime ---
+FROM nginx:alpine AS runtime
 COPY nginx.conf /etc/nginx/conf.d/default.conf
-
-# Copy built frontend assets to Nginx public folder
-COPY --from=build-stage /app/dist /usr/share/nginx/html
-
-# Expose Nginx default port
+COPY --from=build /app/dist /usr/share/nginx/html
 EXPOSE 80
-
-# Start Nginx in foreground mode
 CMD ["nginx", "-g", "daemon off;"]
