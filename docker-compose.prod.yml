@@ -1,49 +1,24 @@
-version: "3.9"
-
+# Production-style overrides.
+# Usage: docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+# nginx serves the built frontend and proxies /api to the backend; neither the
+# database nor the backend is published to the host.
 services:
+  db:
+    restart: unless-stopped
+
+  backend:
+    build:
+      target: runtime
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+    restart: unless-stopped
 
   frontend:
     build:
-      context: ./frontend
-      dockerfile: Dockerfile
+      target: runtime
       args:
         VITE_API_URL: /api
     ports:
       - "80:80"
-  backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-      args:
-        DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:postgres@db:5432/training_db}
-    env_file:
-      - ./backend/.env.production
-    environment:
-      NODE_ENV: production
-      PORT: 3000
-    command: ["/app/entrypoint.sh"]
-    depends_on:
-      db:
-        condition: service_healthy
-    # Backend does NOT need to expose any port in production
-    # Nginx will communicate with it internally in the Docker network
-
-  db:
-    image: postgres:16
-    restart: always
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: training_db
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-    volumes:
-      - pgdata_prod:/var/lib/postgresql/data
-    # DB should NOT be exposed to the host in production
-    # Only backend should access it, internally
-
-volumes:
-  pgdata_prod:
+    restart: unless-stopped

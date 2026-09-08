@@ -1,3 +1,8 @@
+# Base definition shared by dev and prod.
+#   dev  : `docker compose up` (docker-compose.override.yml is applied automatically)
+#   prod : `docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d`
+name: training-project
+
 services:
   db:
     image: postgres:16
@@ -10,26 +15,14 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-    ports:
-      - "5433:5432"
     volumes:
-      - pgdata_dev:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql/data
 
   backend:
     build:
       context: ./backend
-      dockerfile: Dockerfile.dev
     environment:
       DATABASE_URL: postgresql://postgres:postgres@db:5432/training_db
-      CORS_ORIGIN: http://localhost:5173
-      NODE_ENV: development
-      PORT: 3000
-    command: ["sh", "/app/entrypoint.dev.sh"]
-    ports:
-      - "3000:3000"
-    volumes:
-      - ./backend:/app
-      - backend_node_modules:/app/node_modules
     depends_on:
       db:
         condition: service_healthy
@@ -37,19 +30,8 @@ services:
   frontend:
     build:
       context: ./frontend
-      dockerfile: Dockerfile.dev
-    environment:
-      VITE_API_URL: http://localhost:3000
-    command: ["sh", "/app/entrypoint.dev.sh"]
-    ports:
-      - "${FRONT_PORT:-5173}:5173"
-    volumes:
-      - ./frontend:/app
-      - frontend_node_modules:/app/node_modules
     depends_on:
       - backend
 
 volumes:
-  pgdata_dev:
-  backend_node_modules:
-  frontend_node_modules:
+  pgdata:
