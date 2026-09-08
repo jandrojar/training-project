@@ -6,10 +6,13 @@ import userRouter from "./routes/userRoutes";
 import projectsRouter from "./routes/projectRoutes";
 import tasksRouter from "./routes/taskRoutes";
 import cors from "@koa/cors";
+import { errorHandler } from "./middleware/errorHandler";
 
 const app = new Koa();
 const router = new Router();
 const allowedOrigin = process.env.CORS_ORIGIN || "*";
+
+app.use(errorHandler);
 
 app.use(
   cors({

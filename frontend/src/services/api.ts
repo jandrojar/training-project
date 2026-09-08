@@ -24,11 +24,13 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     const status = error?.response?.status;
-    const code = error?.response?.data?.error;
+
+    // Backend error shape: { error: { code, message } }
+    const payload = error?.response?.data?.error;
+    const code = typeof payload === "object" ? payload?.code : payload;
 
     const message =
-      error?.response?.data?.message ||
-      error?.response?.data?.error ||
+      (typeof payload === "object" ? payload?.message : payload) ||
       error?.message ||
       "Request failed";
 

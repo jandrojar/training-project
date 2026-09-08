@@ -1,22 +1,25 @@
 import UserRepository from "../repositories/UserRepository";
 import bcrypt from "bcrypt";
 import type { UserRegister, UserDTO, UserUpdate, UserPasswordUpdateInput } from "../types/User";
+import { BadRequestError, ConflictError, NotFoundError } from "../errors/AppError";
 
 const userRepo = new UserRepository();
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export async function registerUser(user: UserRegister): Promise<UserDTO> {
   // --- Basic validations ---
   if (user.password.length < 6) {
-    throw new Error("Password must be at least 6 characters long");
+    throw new BadRequestError("Password must be at least 6 characters long", "weak-password");
   }
 
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(user.email)) {
-    throw new Error("Invalid email address");
+  if (!EMAIL_RE.test(user.email)) {
+    throw new BadRequestError("Invalid email address", "invalid-email");
   }
 
   const duplicatedEmail = await userRepo.findByEmail(user.email);
   if (duplicatedEmail) {
-    throw new Error("This email is already in use");
+    throw new ConflictError("This email is already in use", "email-in-use");
   }
 
   if (
@@ -24,11 +27,11 @@ export async function registerUser(user: UserRegister): Promise<UserDTO> {
     (user.lastname && user.lastname.length > 50) ||
     user.email.length > 50
   ) {
-    throw new Error("This input field cannot exceed 50 characters");
+    throw new BadRequestError("This input field cannot exceed 50 characters", "field-too-long");
   }
 
   if (user.age !== undefined && user.age !== null && (user.age < 18 || user.age >= 120)) {
-    throw new Error("Age must be between 18 and 120 years old");
+    throw new BadRequestError("Age must be between 18 and 120 years old", "invalid-age");
   }
 
   // --- Hash password ---
@@ -66,14 +69,14 @@ export async function getUserById(userId: string): Promise<UserDTO | null> {
 }
 
 export async function updateUser(userId: string, user: UserUpdate): Promise<UserDTO> {
-  if (user.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(user.email)) {
-    throw new Error("Invalid email address");
+  if (user.email && !EMAIL_RE.test(user.email)) {
+    throw new BadRequestError("Invalid email address", "invalid-email");
   }
 
   if (user.email) {
     const duplicatedEmail = await userRepo.findByEmail(user.email);
     if (duplicatedEmail && duplicatedEmail.id !== userId) {
-      throw new Error("This email is already in use");
+      throw new ConflictError("This email is already in use", "email-in-use");
     }
   }
 
@@ -82,11 +85,11 @@ export async function updateUser(userId: string, user: UserUpdate): Promise<User
     (user.lastname && user.lastname.length > 50) ||
     (user.email && user.email.length > 50)
   ) {
-    throw new Error("This input field cannot exceed 50 characters");
+    throw new BadRequestError("This input field cannot exceed 50 characters", "field-too-long");
   }
 
   if (user.age !== undefined && user.age !== null && (user.age < 18 || user.age >= 120)) {
-    throw new Error("Age must be between 18 and 120 years old");
+    throw new BadRequestError("Age must be between 18 and 120 years old", "invalid-age");
   }
 
   const updatedUser = await userRepo.update(userId, user);
@@ -106,21 +109,24 @@ export async function updateUserPassword(
   newPassword: string,
 ): Promise<void> {
   if (newPassword.length < 6) {
-    throw new Error("New password must be at least 6 characters long");
+    throw new BadRequestError("New password must be at least 6 characters long", "weak-password");
   }
 
   const user = await userRepo.findById(userId);
   if (!user) {
-    throw new Error("User not found");
+    throw new NotFoundError("User not found", "user-not-found");
   }
 
   const passwordMatch = await bcrypt.compare(currentPassword, user.password);
   if (!passwordMatch) {
-    throw new Error("Current password is incorrect");
+    throw new BadRequestError("Current password is incorrect", "invalid-current-password");
   }
 
   if (currentPassword === newPassword) {
-    throw new Error("New password cannot be the same as the current password");
+    throw new BadRequestError(
+      "New password cannot be the same as the current password",
+      "password-unchanged",
+    );
   }
 
   const payload: UserPasswordUpdateInput = {

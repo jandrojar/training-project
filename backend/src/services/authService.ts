@@ -2,19 +2,21 @@ import UserRepository from "../repositories/UserRepository";
 import SessionRepository from "../repositories/SessionRepository";
 import bcrypt from "bcrypt";
 import { SESSION_TTL_MS } from "../config/auth";
+import { UnauthorizedError } from "../errors/AppError";
 
 const userRepo = new UserRepository();
 const sessionRepo = new SessionRepository();
+
 export async function login(email: string, password: string) {
   const user = await userRepo.findByEmail(email);
   if (!user) {
-    throw new Error("Invalid credentials");
+    throw new UnauthorizedError("Invalid credentials", "invalid-credentials");
   }
 
   // Compare input password with hashed password in database
   const valid = await bcrypt.compare(password, user.password);
   if (!valid) {
-    throw new Error("Invalid credentials");
+    throw new UnauthorizedError("Invalid credentials", "invalid-credentials");
   }
 
   const expiresAt = new Date(Date.now() + SESSION_TTL_MS); // 1 week

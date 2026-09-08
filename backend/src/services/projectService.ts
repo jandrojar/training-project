@@ -1,5 +1,6 @@
 import ProjectRepository from "../repositories/ProjectRepository";
 import { ProjectPayload, ProjectDTO, ProjectPriority, ProjectStatus } from "../types/Project";
+import { BadRequestError, NotFoundError } from "../errors/AppError";
 
 const projectRepo = new ProjectRepository();
 
@@ -30,22 +31,37 @@ const toProjectDTO = (project: {
   updatedAt: project.updatedAt,
 });
 
+function assertValidStatus(status?: ProjectStatus) {
+  if (status && !VALID_STATUSES.includes(status)) {
+    throw new BadRequestError("Invalid status", "invalid-status");
+  }
+}
+
+function assertValidPriority(priority?: ProjectPriority) {
+  if (priority && !VALID_PRIORITIES.includes(priority)) {
+    throw new BadRequestError("Invalid priority", "invalid-priority");
+  }
+}
+
+function parseDeadline(deadline: string | Date): Date {
+  const date = new Date(deadline);
+  if (isNaN(date.getTime())) {
+    throw new BadRequestError("Invalid deadline date", "invalid-deadline");
+  }
+  return date;
+}
+
 export async function createProject(
   userId: string,
   projectData: ProjectPayload,
 ): Promise<ProjectDTO> {
   // ---- Basic validations ----
   if (!projectData.title || projectData.title.trim().length < 3) {
-    throw new Error("Title must be at least three characters long");
+    throw new BadRequestError("Title must be at least three characters long", "invalid-title");
   }
 
-  if (projectData.status && !VALID_STATUSES.includes(projectData.status)) {
-    throw new Error("Invalid status");
-  }
-
-  if (projectData.priority && !VALID_PRIORITIES.includes(projectData.priority)) {
-    throw new Error("Invalid priority");
-  }
+  assertValidStatus(projectData.status);
+  assertValidPriority(projectData.priority);
 
   // ---- Create safe copy to avoid mutating function parameters ----
   const dataToSave: ProjectPayload = {
@@ -53,13 +69,8 @@ export async function createProject(
     title: projectData.title.trim(),
   };
 
-  // ---- Deadline parse ----
   if (projectData.deadline !== undefined) {
-    const date = new Date(projectData.deadline);
-    if (isNaN(date.getTime())) {
-      throw new Error("Invalid deadline date");
-    }
-    dataToSave.deadline = date;
+    dataToSave.deadline = parseDeadline(projectData.deadline);
   }
 
   const project = await projectRepo.createProject({
@@ -79,10 +90,6 @@ export async function getProjectForUser(
   projectId: string,
   userId: string,
 ): Promise<ProjectDTO | null> {
-  if (!projectId) {
-    throw new Error("Project not found");
-  }
-
   const project = await projectRepo.getProjectByIdForUser(projectId, userId);
 
   if (!project) {
@@ -97,51 +104,38 @@ export async function updateProjectForUser(
   userId: string,
   data: Partial<ProjectPayload>,
 ): Promise<ProjectDTO> {
-  if (!projectId) {
-    throw new Error("Project not found");
-  }
-
   if (data.title && data.title.trim().length < 3) {
-    throw new Error("Title must be at least three characters long");
+    throw new BadRequestError("Title must be at least three characters long", "invalid-title");
   }
 
-  if (data.status && !VALID_STATUSES.includes(data.status)) {
-    throw new Error("Invalid status");
-  }
-
-  if (data.priority && !VALID_PRIORITIES.includes(data.priority)) {
-    throw new Error("Invalid priority");
-  }
+  assertValidStatus(data.status);
+  assertValidPriority(data.priority);
 
   if (data.deadline !== undefined) {
-    const date = new Date(data.deadline);
-    if (isNaN(date.getTime())) {
-      throw new Error("Invalid deadline date");
-    }
-    data.deadline = date;
+    data.deadline = parseDeadline(data.deadline);
   }
 
   const updatedProject = await projectRepo.updateProject(projectId, userId, data);
 
   if (!updatedProject) {
-    throw new Error("Project not found or you do not have permission to update it");
+    throw new NotFoundError(
+      "Project not found or you do not have permission to update it",
+      "project-not-found",
+    );
   }
 
   return toProjectDTO(updatedProject);
 }
 
 export async function deleteProjectForUser(projectId: string, userId: string): Promise<void> {
-  if (!projectId) {
-    throw new Error("Project not found");
-  }
-
   const deleted = await projectRepo.deleteProject(projectId, userId);
 
   if (!deleted) {
-    throw new Error("Project not found or you do not have permission to delete it");
+    throw new NotFoundError(
+      "Project not found or you do not have permission to delete it",
+      "project-not-found",
+    );
   }
-
-  return;
 }
 
 export async function getFilteredProjects(
@@ -152,13 +146,8 @@ export async function getFilteredProjects(
     priority?: ProjectPriority;
   },
 ): Promise<ProjectDTO[]> {
-  if (query.status && !VALID_STATUSES.includes(query.status)) {
-    throw new Error("Invalid status");
-  }
-
-  if (query.priority && !VALID_PRIORITIES.includes(query.priority)) {
-    throw new Error("Invalid priority");
-  }
+  assertValidStatus(query.status);
+  assertValidPriority(query.priority);
 
   const projects = await projectRepo.getFilteredProjects(userId, query);
 
