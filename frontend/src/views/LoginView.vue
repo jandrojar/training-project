@@ -3,7 +3,7 @@
     <div class="w-full max-w-sm p-6 bg-white rounded-xl shadow">
       <h1 class="text-2xl font-bold mb-4 text-center">Login</h1>
 
-      <form @submit.prevent="handleLogin" class="space-y-4">
+      <form class="space-y-4" @submit.prevent="handleLogin">
         <input
           v-model="user.email"
           type="email"
@@ -39,33 +39,33 @@
 </template>
 
 <script setup lang="ts">
-import { reactive } from 'vue'
-import { useRouter } from 'vue-router'
-import { login } from '../services/authService'
-import { useSessionStore } from '../stores/session'
-import type { IUserLogin } from '../types/types'
-import { useToast } from '../composables/useToast'
-import { isHandledError } from '../helpers/isHandledError'
+import { reactive } from "vue";
+import { useRouter } from "vue-router";
+import { login } from "../services/authService";
+import { useSessionStore } from "../stores/session";
+import type { IUserLogin } from "../types/types";
+import { useToast } from "../composables/useToast";
+import { isHandledError } from "../helpers/isHandledError";
 
 const user = reactive<IUserLogin>({
-  email: '',
-  password: ''
-})
+  email: "",
+  password: "",
+});
 
-const router = useRouter()
-const sessionStore = useSessionStore()
+const router = useRouter();
+const sessionStore = useSessionStore();
 
 async function handleLogin() {
   try {
-    const response = await login(user)
+    const response = await login(user);
 
-    sessionStore.setSession(response)
+    sessionStore.setSession(response);
 
-    router.push('/app/dashboard')
+    router.push("/app/dashboard");
   } catch (error: unknown) {
     if (!isHandledError(error)) {
-      const message = error instanceof Error ? error.message : 'An unexpected error occurred'
-      useToast().error(message)
+      const message = error instanceof Error ? error.message : "An unexpected error occurred";
+      useToast().error(message);
     }
   }
 }

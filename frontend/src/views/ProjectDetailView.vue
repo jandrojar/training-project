@@ -1,6 +1,5 @@
 <template>
   <div class="space-y-8">
-
     <!-- HEADER -->
     <div class="space-y-2">
       <p class="text-sm uppercase tracking-wide text-gray-400">Project</p>
@@ -33,29 +32,20 @@
         </div>
       </div>
 
-      <p class="text-sm text-gray-500 mt-6">
-        Project ID: {{ project?.id }}
-      </p>
+      <p class="text-sm text-gray-500 mt-6">Project ID: {{ project?.id }}</p>
     </div>
 
     <!-- LOADING / ERROR -->
-    <div
-      v-if="loading"
-      class="bg-white border rounded-lg p-6 shadow-sm text-gray-600"
-    >
+    <div v-if="loading" class="bg-white border rounded-lg p-6 shadow-sm text-gray-600">
       Loading project...
     </div>
 
-    <div
-      v-else-if="!project"
-      class="bg-white border rounded-lg p-6 shadow-sm text-red-600"
-    >
+    <div v-else-if="!project" class="bg-white border rounded-lg p-6 shadow-sm text-red-600">
       Project not found.
     </div>
 
     <!-- CONTENT -->
     <template v-else>
-
       <!-- GENERAL INFO -->
       <section class="bg-white border rounded-lg p-6 shadow-sm space-y-4">
         <h2 class="text-lg font-semibold text-gray-900">General information</h2>
@@ -67,9 +57,7 @@
           </p>
         </div>
 
-        <div v-else class="text-sm text-gray-400 italic">
-          No description provided.
-        </div>
+        <div v-else class="text-sm text-gray-400 italic">No description provided.</div>
 
         <!-- TAGS -->
         <div>
@@ -85,9 +73,7 @@
             </span>
           </div>
 
-          <div v-else class="text-sm text-gray-400 italic">
-            No tags.
-          </div>
+          <div v-else class="text-sm text-gray-400 italic">No tags.</div>
         </div>
 
         <!-- DATES -->
@@ -121,13 +107,9 @@
           </div>
         </div>
 
-        <div v-if="tasksLoading" class="text-sm text-gray-600">
-          Loading tasks...
-        </div>
+        <div v-if="tasksLoading" class="text-sm text-gray-600">Loading tasks...</div>
 
-        <div v-else-if="!tasks.length" class="text-sm text-gray-400 italic">
-          No tasks yet.
-        </div>
+        <div v-else-if="!tasks.length" class="text-sm text-gray-400 italic">No tasks yet.</div>
 
         <div v-else class="grid gap-3 md:grid-cols-2">
           <article
@@ -146,40 +128,82 @@
               <div class="flex items-center gap-2">
                 <span
                   class="px-2 py-1 rounded-full text-xs font-medium border"
-                  :class="task.done ? 'bg-green-50 text-green-700 border-green-100' : 'bg-gray-100 text-gray-700 border-gray-200'"
+                  :class="
+                    task.done
+                      ? 'bg-green-50 text-green-700 border-green-100'
+                      : 'bg-gray-100 text-gray-700 border-gray-200'
+                  "
                 >
                   {{ task.done ? "Done" : "Pending" }}
                 </span>
                 <div class="flex items-center gap-2 text-gray-500">
                   <button
                     class="p-2 rounded-lg border border-gray-200 hover:bg-gray-100 cursor-pointer disabled:opacity-50"
-                    @click="toggleTaskDone(task)"
                     :disabled="taskActioningId === task.id"
                     title="Toggle done"
+                    @click="toggleTaskDone(task)"
                   >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    <svg
+                      class="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M5 13l4 4L19 7"
+                      ></path>
                     </svg>
                   </button>
                   <button
                     class="p-2 rounded-lg border border-gray-200 hover:bg-gray-100 cursor-pointer disabled:opacity-50"
-                    @click="openEditTask(task)"
                     :disabled="taskActioningId === task.id"
                     title="Edit task"
+                    @click="openEditTask(task)"
                   >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 20h9"></path>
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16.5 3.5a2.121 2.121 0 013 3L8 18l-4 1 1-4z"></path>
+                    <svg
+                      class="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M12 20h9"
+                      ></path>
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M16.5 3.5a2.121 2.121 0 013 3L8 18l-4 1 1-4z"
+                      ></path>
                     </svg>
                   </button>
                   <button
                     class="p-2 rounded-lg border border-gray-200 hover:bg-red-50 hover:border-red-200 hover:text-red-600 cursor-pointer disabled:opacity-50"
-                    @click.stop="openDeleteTask(task)"
                     :disabled="taskActioningId === task.id"
                     title="Delete task"
+                    @click.stop="openDeleteTask(task)"
                   >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m-3 0h14"></path>
+                    <svg
+                      class="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m-3 0h14"
+                      ></path>
                     </svg>
                   </button>
                 </div>
@@ -194,9 +218,7 @@
           </article>
         </div>
       </section>
-
     </template>
-
   </div>
 
   <CreateTaskModal
@@ -210,146 +232,146 @@
 
   <ConfirmDeleteModal
     v-if="showConfirmDeleteModal"
-    entityLabel="task"
-    :itemName="confirmDeleteTask ? confirmDeleteTask.title : ''"
+    entity-label="task"
+    :item-name="confirmDeleteTask ? confirmDeleteTask.title : ''"
     title="Delete task"
     description="Are you sure you want to delete this task? This action cannot be undone."
-    confirmLabel="Delete Task"
-    cancelLabel="Cancel"
-    loadingLabel="Deleting..."
+    confirm-label="Delete Task"
+    cancel-label="Cancel"
+    loading-label="Deleting..."
     :loading="!!confirmDeleteTask && taskActioningId === confirmDeleteTask.id"
-    :confirmDisabled="!confirmDeleteTask"
+    :confirm-disabled="!confirmDeleteTask"
     @close="closeConfirmDeleteModal"
     @confirm="confirmDeleteTaskAction"
   />
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue"
-import { useRoute } from "vue-router"
-import { getProject } from "../services/projectService"
-import { deleteTask, getTasks, updateTaskDone } from "../services/taskService"
-import type { IProject, ITask } from "../types/types"
-import { priorityClasses, statusClasses } from "../helpers/projectBadgeClasses"
-import { formatDate, formatDateShort } from "../helpers/formatDates"
-import CreateTaskModal from "../components/CreateTaskModal.vue"
-import ConfirmDeleteModal from "../components/ConfirmDeleteModal.vue"
-import { useToast } from "../composables/useToast"
-import { isHandledError } from "../helpers/isHandledError"
+import { ref, onMounted } from "vue";
+import { useRoute } from "vue-router";
+import { getProject } from "../services/projectService";
+import { deleteTask, getTasks, updateTaskDone } from "../services/taskService";
+import type { IProject, ITask } from "../types/types";
+import { priorityClasses, statusClasses } from "../helpers/projectBadgeClasses";
+import { formatDate, formatDateShort } from "../helpers/formatDates";
+import CreateTaskModal from "../components/CreateTaskModal.vue";
+import ConfirmDeleteModal from "../components/ConfirmDeleteModal.vue";
+import { useToast } from "../composables/useToast";
+import { isHandledError } from "../helpers/isHandledError";
 
-const route = useRoute()
-const loading = ref(true)
-const tasksLoading = ref(true)
-const project = ref<IProject | null>(null)
-const tasks = ref<ITask[]>([])
-const showTaskModal = ref(false)
-const showConfirmDeleteModal = ref(false)
-const confirmDeleteTask = ref<ITask | null>(null)
-const editingTask = ref<ITask | null>(null)
-const taskActioningId = ref<string | null>(null) // For disabling buttons while actioning a task
+const route = useRoute();
+const loading = ref(true);
+const tasksLoading = ref(true);
+const project = ref<IProject | null>(null);
+const tasks = ref<ITask[]>([]);
+const showTaskModal = ref(false);
+const showConfirmDeleteModal = ref(false);
+const confirmDeleteTask = ref<ITask | null>(null);
+const editingTask = ref<ITask | null>(null);
+const taskActioningId = ref<string | null>(null); // For disabling buttons while actioning a task
 
 onMounted(async () => {
-  const id = route.params.id as string
+  const id = route.params.id as string;
   try {
-    project.value = await getProject(id)
+    project.value = await getProject(id);
   } catch (err: unknown) {
-    project.value = null
+    project.value = null;
     if (!isHandledError(err)) {
-      const message = err instanceof Error ? err.message : "Could not load project."
-      useToast().error(message)
+      const message = err instanceof Error ? err.message : "Could not load project.";
+      useToast().error(message);
     }
   } finally {
-    loading.value = false
+    loading.value = false;
   }
 
-  await loadTasks(id)
-})
+  await loadTasks(id);
+});
 
 async function loadTasks(projectId: string) {
-  tasksLoading.value = true
+  tasksLoading.value = true;
   try {
-    tasks.value = await getTasks(projectId)
+    tasks.value = await getTasks(projectId);
   } catch (err: unknown) {
     if (!isHandledError(err)) {
-      const message = err instanceof Error ? err.message : "Could not load tasks."
-      useToast().error(message)
+      const message = err instanceof Error ? err.message : "Could not load tasks.";
+      useToast().error(message);
     }
   } finally {
-    tasksLoading.value = false
+    tasksLoading.value = false;
   }
 }
 
 function handleTaskCreated(task: ITask) {
-  tasks.value.unshift(task)
-  closeTaskModal()
+  tasks.value.unshift(task);
+  closeTaskModal();
 }
 
 function handleTaskUpdated(task: ITask) {
-  const idx = tasks.value.findIndex(t => t.id === task.id)
+  const idx = tasks.value.findIndex((t) => t.id === task.id);
   if (idx !== -1) {
-    tasks.value.splice(idx, 1, task) // Update the task in place
+    tasks.value.splice(idx, 1, task); // Update the task in place
   }
-  closeTaskModal()
+  closeTaskModal();
 }
 
 function openCreateTask() {
-  editingTask.value = null
-  showTaskModal.value = true
+  editingTask.value = null;
+  showTaskModal.value = true;
 }
 
 function openEditTask(task: ITask) {
-  editingTask.value = task
-  showTaskModal.value = true
+  editingTask.value = task;
+  showTaskModal.value = true;
 }
 
 function closeTaskModal() {
-  showTaskModal.value = false
-  editingTask.value = null
+  showTaskModal.value = false;
+  editingTask.value = null;
 }
 
 function openDeleteTask(task: ITask) {
-  confirmDeleteTask.value = task
-  showConfirmDeleteModal.value = true
+  confirmDeleteTask.value = task;
+  showConfirmDeleteModal.value = true;
 }
 
 function closeConfirmDeleteModal() {
-  showConfirmDeleteModal.value = false
-  confirmDeleteTask.value = null
+  showConfirmDeleteModal.value = false;
+  confirmDeleteTask.value = null;
 }
 
 async function toggleTaskDone(task: ITask) {
-  if (!project.value) return
-  taskActioningId.value = task.id
+  if (!project.value) return;
+  taskActioningId.value = task.id;
   try {
-    const updated = await updateTaskDone(project.value.id, task.id, !task.done)
-    const idx = tasks.value.findIndex(t => t.id === task.id)
-    if (idx !== -1) tasks.value.splice(idx, 1, updated)
+    const updated = await updateTaskDone(project.value.id, task.id, !task.done);
+    const idx = tasks.value.findIndex((t) => t.id === task.id);
+    if (idx !== -1) tasks.value.splice(idx, 1, updated);
   } catch (err: unknown) {
     if (!isHandledError(err)) {
-      const message = err instanceof Error ? err.message : "Could not update task."
-      useToast().error(message)
+      const message = err instanceof Error ? err.message : "Could not update task.";
+      useToast().error(message);
     }
   } finally {
-    taskActioningId.value = null
+    taskActioningId.value = null;
   }
 }
 
 async function confirmDeleteTaskAction() {
-  if (!project.value || !confirmDeleteTask.value) return  
-  const task = confirmDeleteTask.value
-  taskActioningId.value = task.id
+  if (!project.value || !confirmDeleteTask.value) return;
+  const task = confirmDeleteTask.value;
+  taskActioningId.value = task.id;
   try {
-    await deleteTask(project.value.id, task.id)
-    tasks.value = tasks.value.filter(t => t.id !== task.id)
-    useToast().success("Task deleted successfully")
+    await deleteTask(project.value.id, task.id);
+    tasks.value = tasks.value.filter((t) => t.id !== task.id);
+    useToast().success("Task deleted successfully");
   } catch (err: unknown) {
     if (!isHandledError(err)) {
-      const message = err instanceof Error ? err.message : "Could not delete task."
-      useToast().error(message)
+      const message = err instanceof Error ? err.message : "Could not delete task.";
+      useToast().error(message);
     }
   } finally {
-    taskActioningId.value = null
-    closeConfirmDeleteModal()
+    taskActioningId.value = null;
+    closeConfirmDeleteModal();
   }
 }
 </script>

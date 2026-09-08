@@ -2,51 +2,50 @@ import { Context } from "koa";
 import { login, logout } from "../services/authService";
 
 export async function loginHandler(ctx: Context) {
-	const { email, password } = ctx.request.body as {email:string,password:string};
+  const { email, password } = ctx.request.body as { email: string; password: string };
 
-    if(!email || !password){
-        ctx.status=400
-        ctx.body={message:'Missing credentials'}
-        return
+  if (!email || !password) {
+    ctx.status = 400;
+    ctx.body = { message: "Missing credentials" };
+    return;
+  }
+
+  try {
+    const session = await login(email, password);
+    ctx.status = 200;
+    ctx.body = session;
+    return;
+  } catch (err: any) {
+    // Invalid credentials
+    if (err.message === "Invalid credentials") {
+      ctx.status = 401;
+      ctx.body = { message: "Invalid credentials" };
+      return;
     }
 
-    try {
-        const session = await login(email, password);
-        ctx.status = 200;
-        ctx.body = session;
-        return;
-
-    } catch (err: any) {
-        // Invalid credentials
-        if (err.message === "Invalid credentials") {
-            ctx.status = 401;
-            ctx.body = { message: "Invalid credentials" };
-            return;
-        }
-
-        // Unexpected error
-        ctx.status = 500;
-        ctx.body = { message: "Internal server error" };
-    }
+    // Unexpected error
+    ctx.status = 500;
+    ctx.body = { message: "Internal server error" };
+  }
 }
 
 export async function logoutHandler(ctx: Context) {
-  const rawAuth = ctx.headers["authorization"]
+  const rawAuth = ctx.headers["authorization"];
 
   if (!rawAuth || typeof rawAuth !== "string" || !rawAuth.startsWith("Bearer ")) {
-    ctx.status = 400
-    ctx.body = { message: "Missing or invalid authorization header" }
-    return
+    ctx.status = 400;
+    ctx.body = { message: "Missing or invalid authorization header" };
+    return;
   }
 
-  const sessionId = rawAuth.replace("Bearer ", "").trim()
+  const sessionId = rawAuth.replace("Bearer ", "").trim();
 
   try {
-    await logout(sessionId)
-    ctx.status = 200
-    ctx.body = { success: true }
+    await logout(sessionId);
+    ctx.status = 200;
+    ctx.body = { success: true };
   } catch (err) {
-    ctx.status = 500
-    ctx.body = { message: "Internal server error" }
+    ctx.status = 500;
+    ctx.body = { message: "Internal server error" };
   }
 }

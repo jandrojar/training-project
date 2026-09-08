@@ -1,44 +1,44 @@
-import prisma from '../services/prisma';
-import type { UserCreateInput, UserUpdateInput, UserPasswordUpdateInput } from '../types/User';
+import prisma from "../services/prisma";
+import type { UserCreateInput, UserUpdateInput, UserPasswordUpdateInput } from "../types/User";
 
 export default class UserPrismaRepository {
-	async findAll() {
-		return prisma.user.findMany()
-	}
+  async findAll() {
+    return prisma.user.findMany();
+  }
 
-    async findById(id: string) {
-        return prisma.user.findUnique({
-            where: { id }
-        })
-    }
+  async findById(id: string) {
+    return prisma.user.findUnique({
+      where: { id },
+    });
+  }
 
-    async findByEmail(email: string) {
-        return prisma.user.findUnique({
-            where: { email },
-        })
-    }
+  async findByEmail(email: string) {
+    return prisma.user.findUnique({
+      where: { email },
+    });
+  }
 
-    async create(data: UserCreateInput) {
-        return prisma.user.create({ data})
-    }
+  async create(data: UserCreateInput) {
+    return prisma.user.create({ data });
+  }
 
-    async update(id: string, data: UserUpdateInput) {
-        return prisma.user.update({
-        where: { id },
-        data,
-        });
-    }
+  async update(id: string, data: UserUpdateInput) {
+    return prisma.user.update({
+      where: { id },
+      data,
+    });
+  }
 
-    async delete(id: string) {
-        return prisma.user.delete({
-        where: { id },
-        });
-    }
+  async delete(id: string) {
+    return prisma.user.delete({
+      where: { id },
+    });
+  }
 
-    async updatePassword(id: string, data: UserPasswordUpdateInput) {
-        return prisma.user.update({
-        where: { id },
-        data,
-        });
-    }
+  async updatePassword(id: string, data: UserPasswordUpdateInput) {
+    return prisma.user.update({
+      where: { id },
+      data,
+    });
+  }
 }

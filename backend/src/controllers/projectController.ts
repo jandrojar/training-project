@@ -8,12 +8,7 @@ import {
   getFilteredProjects,
 } from "../services/projectService";
 
-import {
-  ProjectPayload,
-  ProjectStatus,
-  ProjectPriority,
-} from "../types/Project";
-
+import { ProjectPayload, ProjectStatus, ProjectPriority } from "../types/Project";
 
 export async function createProjectHandler(ctx: Context) {
   const userId = ctx.state.userId;
@@ -45,9 +40,7 @@ export async function createProjectHandler(ctx: Context) {
   }
 
   const cleanDescription =
-    typeof body.description === "string"
-      ? body.description.trim()
-      : body.description;
+    typeof body.description === "string" ? body.description.trim() : body.description;
 
   try {
     const project = await createProject(userId, {
@@ -64,7 +57,6 @@ export async function createProjectHandler(ctx: Context) {
   }
 }
 
-
 export async function getProjectsHandler(ctx: Context) {
   const userId = ctx.state.userId;
 
@@ -72,7 +64,6 @@ export async function getProjectsHandler(ctx: Context) {
   ctx.status = 200;
   ctx.body = projects;
 }
-
 
 export async function getProjectHandler(ctx: Context) {
   const userId = ctx.state.userId;
@@ -94,7 +85,6 @@ export async function getProjectHandler(ctx: Context) {
     ctx.body = { message: (err as Error).message };
   }
 }
-
 
 export async function updateProjectHandler(ctx: Context) {
   const userId = ctx.state.userId;
@@ -153,8 +143,6 @@ export async function deleteProjectHandler(ctx: Context) {
     ctx.body = { message: (err as Error).message };
   }
 }
-
-
 
 export async function getFilteredProjectsHandler(ctx: Context) {
   const userId = ctx.state.userId;

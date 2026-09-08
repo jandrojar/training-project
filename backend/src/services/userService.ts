@@ -5,122 +5,131 @@ import type { UserRegister, UserDTO, UserUpdate, UserPasswordUpdateInput } from 
 const userRepo = new UserRepository();
 
 export async function registerUser(user: UserRegister): Promise<UserDTO> {
-    // --- Basic validations ---
-    if (user.password.length < 6) {
-        throw new Error("Password must be at least 6 characters long");
-    }
+  // --- Basic validations ---
+  if (user.password.length < 6) {
+    throw new Error("Password must be at least 6 characters long");
+  }
 
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(user.email)) {
-        throw new Error("Invalid email address");
-    }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(user.email)) {
+    throw new Error("Invalid email address");
+  }
 
-    const duplicatedEmail = await userRepo.findByEmail(user.email);
-    if (duplicatedEmail) {
-        throw new Error("This email is already in use");
-    }
+  const duplicatedEmail = await userRepo.findByEmail(user.email);
+  if (duplicatedEmail) {
+    throw new Error("This email is already in use");
+  }
 
-    if (user.name.length > 50 || (user.lastname && user.lastname.length > 50) || user.email.length > 50) {
-        throw new Error("This input field cannot exceed 50 characters");
-    }
+  if (
+    user.name.length > 50 ||
+    (user.lastname && user.lastname.length > 50) ||
+    user.email.length > 50
+  ) {
+    throw new Error("This input field cannot exceed 50 characters");
+  }
 
-    if (user.age !== undefined && user.age !== null && (user.age < 18 || user.age >= 120)) {
-        throw new Error("Age must be between 18 and 120 years old");
-    }
+  if (user.age !== undefined && user.age !== null && (user.age < 18 || user.age >= 120)) {
+    throw new Error("Age must be between 18 and 120 years old");
+  }
 
-    // --- Hash password ---
-    const hashedPassword = await bcrypt.hash(user.password, 10);
+  // --- Hash password ---
+  const hashedPassword = await bcrypt.hash(user.password, 10);
 
-    // --- Persist in DB ---
-    const createdUser = await userRepo.create({
-        ...user,
-        password: hashedPassword
-    });
+  // --- Persist in DB ---
+  const createdUser = await userRepo.create({
+    ...user,
+    password: hashedPassword,
+  });
 
-    // --- Build DTO ---
-    return {
-        id: createdUser.id,
-        name: createdUser.name,
-        lastname: createdUser.lastname ?? undefined,
-        age: createdUser.age ?? undefined,
-        email: createdUser.email
-    };
+  // --- Build DTO ---
+  return {
+    id: createdUser.id,
+    name: createdUser.name,
+    lastname: createdUser.lastname ?? undefined,
+    age: createdUser.age ?? undefined,
+    email: createdUser.email,
+  };
 }
 
 export async function getUserById(userId: string): Promise<UserDTO | null> {
-    const user = await userRepo.findById(userId);
-    if (!user) {
-        return null;
-    }
+  const user = await userRepo.findById(userId);
+  if (!user) {
+    return null;
+  }
 
-    return {
-        id: user.id,
-        name: user.name,
-        lastname: user.lastname ?? undefined,
-        age: user.age ?? undefined,
-        email: user.email
-    };
+  return {
+    id: user.id,
+    name: user.name,
+    lastname: user.lastname ?? undefined,
+    age: user.age ?? undefined,
+    email: user.email,
+  };
 }
 
 export async function updateUser(userId: string, user: UserUpdate): Promise<UserDTO> {
+  if (user.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(user.email)) {
+    throw new Error("Invalid email address");
+  }
 
-    if (user.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(user.email)){
-        throw new Error("Invalid email address");
-    } 
-
-    if (user.email) {
-        const duplicatedEmail = await userRepo.findByEmail(user.email);
-        if (duplicatedEmail && duplicatedEmail.id !== userId) {
-            throw new Error("This email is already in use");
-        }
+  if (user.email) {
+    const duplicatedEmail = await userRepo.findByEmail(user.email);
+    if (duplicatedEmail && duplicatedEmail.id !== userId) {
+      throw new Error("This email is already in use");
     }
+  }
 
-    if (user.name && user.name.length > 50 || (user.lastname && user.lastname.length > 50) || (user.email && user.email.length > 50)) {
-        throw new Error("This input field cannot exceed 50 characters");
-    }
-    
-    if (user.age !== undefined && user.age !== null && (user.age < 18 || user.age >= 120)) {
-        throw new Error("Age must be between 18 and 120 years old");
-    }
+  if (
+    (user.name && user.name.length > 50) ||
+    (user.lastname && user.lastname.length > 50) ||
+    (user.email && user.email.length > 50)
+  ) {
+    throw new Error("This input field cannot exceed 50 characters");
+  }
 
-    const updatedUser = await userRepo.update(userId, user);
-                                                                                                                                    
-    return {
-        id: updatedUser.id,
-        name: updatedUser.name,
-        lastname: updatedUser.lastname ?? undefined,
-        age: updatedUser.age ?? undefined,
-        email: updatedUser.email
-    };
-    
+  if (user.age !== undefined && user.age !== null && (user.age < 18 || user.age >= 120)) {
+    throw new Error("Age must be between 18 and 120 years old");
+  }
+
+  const updatedUser = await userRepo.update(userId, user);
+
+  return {
+    id: updatedUser.id,
+    name: updatedUser.name,
+    lastname: updatedUser.lastname ?? undefined,
+    age: updatedUser.age ?? undefined,
+    email: updatedUser.email,
+  };
 }
 
-export async function updateUserPassword(userId: string, currentPassword: string, newPassword: string): Promise<void> {
-    if (newPassword.length < 6) {
-        throw new Error("New password must be at least 6 characters long");
-    }
+export async function updateUserPassword(
+  userId: string,
+  currentPassword: string,
+  newPassword: string,
+): Promise<void> {
+  if (newPassword.length < 6) {
+    throw new Error("New password must be at least 6 characters long");
+  }
 
-    const user = await userRepo.findById(userId);
-    if (!user) {
-        throw new Error("User not found");
-    }
+  const user = await userRepo.findById(userId);
+  if (!user) {
+    throw new Error("User not found");
+  }
 
-    const passwordMatch = await bcrypt.compare(currentPassword, user.password);
-    if (!passwordMatch) {
-        throw new Error("Current password is incorrect");
-    }
+  const passwordMatch = await bcrypt.compare(currentPassword, user.password);
+  if (!passwordMatch) {
+    throw new Error("Current password is incorrect");
+  }
 
-    if (currentPassword === newPassword) {
-        throw new Error("New password cannot be the same as the current password");
-    }
+  if (currentPassword === newPassword) {
+    throw new Error("New password cannot be the same as the current password");
+  }
 
-    const payload: UserPasswordUpdateInput = {
-        password: await bcrypt.hash(newPassword, 10)
-    };
+  const payload: UserPasswordUpdateInput = {
+    password: await bcrypt.hash(newPassword, 10),
+  };
 
-    await userRepo.updatePassword(userId, payload);
-    
+  await userRepo.updatePassword(userId, payload);
 }
 
 export async function deleteUser(userId: string): Promise<void> {
-    await userRepo.delete(userId);
+  await userRepo.delete(userId);
 }

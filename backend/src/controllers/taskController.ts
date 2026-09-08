@@ -5,7 +5,7 @@ import {
   getTaskForUser,
   updateTaskForUser,
   deleteTaskForUser,
-  updateTaskDoneForUser
+  updateTaskDoneForUser,
 } from "../services/taskService";
 import { TaskPayload } from "../types/Task";
 
@@ -38,9 +38,7 @@ export async function createTaskHandler(ctx: Context) {
   }
 
   const cleanDescription =
-    typeof taskData.description === "string"
-      ? taskData.description.trim()
-      : taskData.description;
+    typeof taskData.description === "string" ? taskData.description.trim() : taskData.description;
 
   try {
     const task = await createTask(projectId, userId, {
@@ -116,10 +114,7 @@ export async function updateTaskHandler(ctx: Context) {
     payload.title = clean;
   }
 
-  if (
-    payload.description !== undefined &&
-    typeof payload.description === "string"
-  ) {
+  if (payload.description !== undefined && typeof payload.description === "string") {
     payload.description = payload.description.trim();
   }
 

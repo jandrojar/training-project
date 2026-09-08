@@ -4,7 +4,6 @@ import { SESSION_TTL_MS, RENEW_WINDOW_MS } from "../config/auth";
 
 const sessionRepo = new SessionRepository();
 
-
 export async function authMiddleware(ctx: Context, next: Next) {
   const rawAuth = ctx.headers["authorization"];
 
