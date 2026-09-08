@@ -12,14 +12,22 @@
             <router-link
               to="/app/dashboard"
               class="px-3 py-2 rounded-lg text-sm font-medium transition"
-              :class="route.path === '/app/dashboard' ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-100'"
+              :class="
+                route.path === '/app/dashboard'
+                  ? 'bg-blue-50 text-blue-700'
+                  : 'text-gray-600 hover:bg-gray-100'
+              "
             >
               Dashboard
             </router-link>
             <router-link
               to="/app/profile"
               class="px-3 py-2 rounded-lg text-sm font-medium transition"
-              :class="route.path === '/app/profile' ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-100'"
+              :class="
+                route.path === '/app/profile'
+                  ? 'bg-blue-50 text-blue-700'
+                  : 'text-gray-600 hover:bg-gray-100'
+              "
             >
               Profile
             </router-link>
@@ -29,16 +37,34 @@
         <div class="hidden md:flex items-center gap-3">
           <button
             type="button"
-            @click="toggleUserMenu"
             class="flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50 transition cursor-pointer"
+            @click="toggleUserMenu"
           >
             <svg class="h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Z" stroke="currentColor" stroke-width="1.5" />
-              <path d="M4 20a8 8 0 0 1 16 0" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+              <path
+                d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Z"
+                stroke="currentColor"
+                stroke-width="1.5"
+              />
+              <path
+                d="M4 20a8 8 0 0 1 16 0"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+              />
             </svg>
             <span class="max-w-40 truncate">{{ userStore.currentUser?.name ?? "User" }}</span>
-            <svg class="h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-              <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 011.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+            <svg
+              class="h-4 w-4 text-gray-400"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 011.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+                clip-rule="evenodd"
+              />
             </svg>
           </button>
 
@@ -66,11 +92,16 @@
         <button
           type="button"
           class="md:hidden p-2 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition"
-          @click="showMobileMenu = !showMobileMenu"
           aria-label="Toggle navigation menu"
+          @click="showMobileMenu = !showMobileMenu"
         >
           <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M4 6h16M4 12h16M4 18h16"
+            />
           </svg>
         </button>
       </div>
@@ -79,7 +110,11 @@
         <router-link
           to="/app/dashboard"
           class="block px-3 py-2 rounded-lg text-sm font-medium"
-          :class="route.path === '/app/dashboard' ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'"
+          :class="
+            route.path === '/app/dashboard'
+              ? 'bg-blue-50 text-blue-700'
+              : 'text-gray-700 hover:bg-gray-100'
+          "
           @click="showMobileMenu = false"
         >
           Dashboard
@@ -87,7 +122,11 @@
         <router-link
           to="/app/profile"
           class="block px-3 py-2 rounded-lg text-sm font-medium"
-          :class="route.path === '/app/profile' ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'"
+          :class="
+            route.path === '/app/profile'
+              ? 'bg-blue-50 text-blue-700'
+              : 'text-gray-700 hover:bg-gray-100'
+          "
           @click="showMobileMenu = false"
         >
           Profile
@@ -109,15 +148,15 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import { useRouter, useRoute } from 'vue-router';
-import { logout } from '../services/authService';
-import { useSessionStore } from '../stores/session';
-import { useUserStore } from '../stores/user';
-import { useToast } from '../composables/useToast';
-import { isHandledError } from '../helpers/isHandledError';
-import { getCurrentUser } from '../services/userService';
-import type { IUser } from '../types/types';
+import { ref, onMounted } from "vue";
+import { useRouter, useRoute } from "vue-router";
+import { logout } from "../services/authService";
+import { useSessionStore } from "../stores/session";
+import { useUserStore } from "../stores/user";
+import { useToast } from "../composables/useToast";
+import { isHandledError } from "../helpers/isHandledError";
+import { getCurrentUser } from "../services/userService";
+import type { IUser } from "../types/types";
 
 const router = useRouter();
 const route = useRoute();
@@ -128,38 +167,35 @@ const showMobileMenu = ref(false);
 
 onMounted(async () => {
   try {
-    if(userStore.currentUser) return; // Avoid refetching if already loaded
-    const user: IUser =  await getCurrentUser();
+    if (userStore.currentUser) return; // Avoid refetching if already loaded
+    const user: IUser = await getCurrentUser();
     userStore.setCurrentUser(user);
   } catch (error: unknown) {
     if (!isHandledError(error)) {
-      const message = error instanceof Error ? error.message : "Failed to fetch user data"
-      useToast().error(message)
+      const message = error instanceof Error ? error.message : "Failed to fetch user data";
+      useToast().error(message);
     }
   }
 });
 
-
 async function handleLogout() {
-  try{
+  try {
     await logout();
     session.clearSession();
     userStore.clearCurrentUser();
     showUserMenu.value = false;
     showMobileMenu.value = false;
-    useToast().success("Logged out successfully")
-    router.push('/login');
+    useToast().success("Logged out successfully");
+    router.push("/login");
   } catch (error: unknown) {
     if (!isHandledError(error)) {
-      const message = error instanceof Error ? error.message : "Logout failed"
-      useToast().error(message)
+      const message = error instanceof Error ? error.message : "Logout failed";
+      useToast().error(message);
     }
   }
-  
 }
 
 function toggleUserMenu() {
   showUserMenu.value = !showUserMenu.value;
 }
-
 </script>

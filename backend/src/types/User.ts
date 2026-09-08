@@ -1,9 +1,9 @@
 export interface UserRegister {
-    name: string;
-    lastname?: string;
-    age?: number;
-    email: string;
-    password: string;
+  name: string;
+  lastname?: string;
+  age?: number;
+  email: string;
+  password: string;
 }
 
 export interface UserDTO {
@@ -27,15 +27,15 @@ export type UserCreateInput = {
   age?: number;
   email: string;
   password: string;
-}
+};
 
 export type UserUpdateInput = {
   name?: string;
   lastname?: string | null;
   age?: number | null;
   email?: string;
-}
+};
 
 export type UserPasswordUpdateInput = {
-  password: string; 
-}
+  password: string;
+};

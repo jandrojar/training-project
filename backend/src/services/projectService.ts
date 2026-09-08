@@ -1,19 +1,9 @@
 import ProjectRepository from "../repositories/ProjectRepository";
-import {
-  ProjectPayload,
-  ProjectDTO,
-  ProjectPriority,
-  ProjectStatus,
-} from "../types/Project";
+import { ProjectPayload, ProjectDTO, ProjectPriority, ProjectStatus } from "../types/Project";
 
 const projectRepo = new ProjectRepository();
 
-const VALID_STATUSES: ProjectStatus[] = [
-  "PLANNED",
-  "IN_PROGRESS",
-  "COMPLETED",
-  "ON_HOLD",
-];
+const VALID_STATUSES: ProjectStatus[] = ["PLANNED", "IN_PROGRESS", "COMPLETED", "ON_HOLD"];
 
 const VALID_PRIORITIES: ProjectPriority[] = ["LOW", "MEDIUM", "HIGH"];
 
@@ -40,12 +30,10 @@ const toProjectDTO = (project: {
   updatedAt: project.updatedAt,
 });
 
-
 export async function createProject(
   userId: string,
-  projectData: ProjectPayload
+  projectData: ProjectPayload,
 ): Promise<ProjectDTO> {
-  
   // ---- Basic validations ----
   if (!projectData.title || projectData.title.trim().length < 3) {
     throw new Error("Title must be at least three characters long");
@@ -60,7 +48,7 @@ export async function createProject(
   }
 
   // ---- Create safe copy to avoid mutating function parameters ----
-  let dataToSave: ProjectPayload = {
+  const dataToSave: ProjectPayload = {
     ...projectData,
     title: projectData.title.trim(),
   };
@@ -82,18 +70,14 @@ export async function createProject(
   return toProjectDTO(project);
 }
 
-
-export async function getProjectsForUser(
-  userId: string
-): Promise<ProjectDTO[]> {
+export async function getProjectsForUser(userId: string): Promise<ProjectDTO[]> {
   const projectsByUser = await projectRepo.getProjectsByUser(userId);
   return projectsByUser.map(toProjectDTO);
 }
 
-
 export async function getProjectForUser(
   projectId: string,
-  userId: string
+  userId: string,
 ): Promise<ProjectDTO | null> {
   if (!projectId) {
     throw new Error("Project not found");
@@ -108,13 +92,11 @@ export async function getProjectForUser(
   return toProjectDTO(project);
 }
 
-
 export async function updateProjectForUser(
   projectId: string,
   userId: string,
-  data: Partial<ProjectPayload>
+  data: Partial<ProjectPayload>,
 ): Promise<ProjectDTO> {
-  
   if (!projectId) {
     throw new Error("Project not found");
   }
@@ -148,11 +130,7 @@ export async function updateProjectForUser(
   return toProjectDTO(updatedProject);
 }
 
-
-export async function deleteProjectForUser(
-  projectId: string,
-  userId: string
-): Promise<void> {
+export async function deleteProjectForUser(projectId: string, userId: string): Promise<void> {
   if (!projectId) {
     throw new Error("Project not found");
   }
@@ -166,16 +144,14 @@ export async function deleteProjectForUser(
   return;
 }
 
-
 export async function getFilteredProjects(
   userId: string,
   query: {
     search?: string;
     status?: ProjectStatus;
     priority?: ProjectPriority;
-  }
+  },
 ): Promise<ProjectDTO[]> {
-
   if (query.status && !VALID_STATUSES.includes(query.status)) {
     throw new Error("Invalid status");
   }

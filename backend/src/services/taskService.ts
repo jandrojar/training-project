@@ -34,9 +34,8 @@ function toTaskDTO(task: {
 export async function createTask(
   projectId: string,
   userId: string,
-  taskData: TaskPayload
+  taskData: TaskPayload,
 ): Promise<TaskDTO> {
-
   // Ensure project belongs to user
   const project = await projectRepo.getProjectByIdForUser(projectId, userId);
   if (!project) throw new Error("Project not found or access denied");
@@ -47,10 +46,9 @@ export async function createTask(
   }
 
   // Normalize date
-  const normalizedData: TaskPayload =
-    taskData.deadline
-      ? { ...taskData, deadline: new Date(taskData.deadline) }
-      : taskData;
+  const normalizedData: TaskPayload = taskData.deadline
+    ? { ...taskData, deadline: new Date(taskData.deadline) }
+    : taskData;
 
   const task = await taskRepo.createTask({
     projectId,
@@ -63,11 +61,7 @@ export async function createTask(
 /**
  * Get all tasks for project
  */
-export async function getTasksForProject(
-  projectId: string,
-  userId: string
-): Promise<TaskDTO[]> {
-
+export async function getTasksForProject(projectId: string, userId: string): Promise<TaskDTO[]> {
   const project = await projectRepo.getProjectByIdForUser(projectId, userId);
   if (!project) throw new Error("Project not found or access denied");
 
@@ -81,9 +75,8 @@ export async function getTasksForProject(
 export async function getTaskForUser(
   taskId: string,
   projectId: string,
-  userId: string
+  userId: string,
 ): Promise<TaskDTO> {
-
   const project = await projectRepo.getProjectByIdForUser(projectId, userId);
   if (!project) throw new Error("Project not found or access denied");
 
@@ -100,9 +93,8 @@ export async function updateTaskForUser(
   taskId: string,
   projectId: string,
   userId: string,
-  data: Partial<TaskPayload>
+  data: Partial<TaskPayload>,
 ): Promise<TaskDTO> {
-
   const project = await projectRepo.getProjectByIdForUser(projectId, userId);
   if (!project) throw new Error("Project not found or access denied");
 
@@ -131,9 +123,8 @@ export async function updateTaskForUser(
 export async function deleteTaskForUser(
   taskId: string,
   projectId: string,
-  userId: string
+  userId: string,
 ): Promise<void> {
-
   const project = await projectRepo.getProjectByIdForUser(projectId, userId);
   if (!project) throw new Error("Project not found or access denied");
 
@@ -148,9 +139,8 @@ export async function updateTaskDoneForUser(
   taskId: string,
   projectId: string,
   userId: string,
-  done: boolean
+  done: boolean,
 ): Promise<TaskDTO> {
-
   const project = await projectRepo.getProjectByIdForUser(projectId, userId);
   if (!project) throw new Error("Project not found or access denied");
 
