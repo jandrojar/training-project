@@ -1,51 +1,28 @@
 import { Context } from "koa";
 import { login, logout } from "../services/authService";
+import { getBearerToken } from "../middleware/authMiddleware";
+import { BadRequestError } from "../errors/AppError";
 
 export async function loginHandler(ctx: Context) {
-  const { email, password } = ctx.request.body as { email: string; password: string };
+  const { email, password } = ctx.request.body as { email?: string; password?: string };
 
   if (!email || !password) {
-    ctx.status = 400;
-    ctx.body = { message: "Missing credentials" };
-    return;
+    throw new BadRequestError("Missing credentials", "missing-credentials");
   }
 
-  try {
-    const session = await login(email, password);
-    ctx.status = 200;
-    ctx.body = session;
-    return;
-  } catch (err: any) {
-    // Invalid credentials
-    if (err.message === "Invalid credentials") {
-      ctx.status = 401;
-      ctx.body = { message: "Invalid credentials" };
-      return;
-    }
-
-    // Unexpected error
-    ctx.status = 500;
-    ctx.body = { message: "Internal server error" };
-  }
+  ctx.body = await login(email, password);
 }
 
 export async function logoutHandler(ctx: Context) {
-  const rawAuth = ctx.headers["authorization"];
+  const token = getBearerToken(ctx);
 
-  if (!rawAuth || typeof rawAuth !== "string" || !rawAuth.startsWith("Bearer ")) {
-    ctx.status = 400;
-    ctx.body = { message: "Missing or invalid authorization header" };
-    return;
+  if (!token) {
+    throw new BadRequestError(
+      "Missing or invalid Authorization header",
+      "missing-or-invalid-authorization-header",
+    );
   }
 
-  const sessionId = rawAuth.replace("Bearer ", "").trim();
-
-  try {
-    await logout(sessionId);
-    ctx.status = 200;
-    ctx.body = { success: true };
-  } catch (err) {
-    ctx.status = 500;
-    ctx.body = { message: "Internal server error" };
-  }
+  await logout(token);
+  ctx.body = { success: true };
 }
