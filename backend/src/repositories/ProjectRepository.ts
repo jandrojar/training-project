@@ -1,4 +1,4 @@
-import prisma from "../services/prisma";
+import prisma from "../lib/prisma";
 import { ProjectPayload, ProjectStatus, ProjectPriority } from "../types/Project";
 
 export default class PrismaProjectRepository {
@@ -10,13 +10,6 @@ export default class PrismaProjectRepository {
         ...project,
         userId,
       },
-    });
-  }
-
-  // Returns all projects that belong to a specific user
-  async getProjectsByUser(userId: string) {
-    return prisma.project.findMany({
-      where: { userId },
     });
   }
 

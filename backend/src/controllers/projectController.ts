@@ -1,7 +1,6 @@
 import { Context } from "koa";
 import {
   createProject,
-  getProjectsForUser,
   getProjectForUser,
   updateProjectForUser,
   deleteProjectForUser,
@@ -34,10 +33,6 @@ export async function createProjectHandler(ctx: Context) {
 
   ctx.status = 201;
   ctx.body = project;
-}
-
-export async function getProjectsHandler(ctx: Context) {
-  ctx.body = await getProjectsForUser(ctx.state.userId);
 }
 
 export async function getProjectHandler(ctx: Context) {

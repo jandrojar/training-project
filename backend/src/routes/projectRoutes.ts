@@ -1,7 +1,6 @@
 import Router from "@koa/router";
 import {
   createProjectHandler,
-  getProjectsHandler,
   getProjectHandler,
   updateProjectHandler,
   deleteProjectHandler,
