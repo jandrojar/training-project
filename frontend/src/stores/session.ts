@@ -34,10 +34,16 @@ export const useSessionStore = defineStore("session", {
       const raw = localStorage.getItem("session");
       if (!raw) return;
 
-      const data: IAuthResponse = JSON.parse(raw);
+      let data: IAuthResponse;
+      try {
+        data = JSON.parse(raw) as IAuthResponse;
+      } catch {
+        this.clearSession();
+        return;
+      }
 
-      // optional: check expiration
-      if (new Date(data.expiresAt) < new Date()) {
+      // Drop anything malformed or already expired
+      if (!data?.sessionId || !data?.expiresAt || new Date(data.expiresAt) < new Date()) {
         this.clearSession();
         return;
       }
