@@ -1,4 +1,4 @@
-import prisma from "../services/prisma";
+import prisma from "../lib/prisma";
 import { TaskPayload } from "../types/Task";
 
 export default class PrismaTaskRepository {
@@ -6,17 +6,17 @@ export default class PrismaTaskRepository {
     const { task, projectId } = data;
 
     return prisma.task.create({
-        data: {
-        ...task,   
-        projectId, 
-        },
+      data: {
+        ...task,
+        projectId,
+      },
     });
-}
+  }
 
   async getTasksByProject(projectId: string) {
     return prisma.task.findMany({
-        where: { projectId },
-        orderBy: { createdAt: "desc" }
+      where: { projectId },
+      orderBy: { createdAt: "desc" },
     });
   }
 
@@ -37,7 +37,7 @@ export default class PrismaTaskRepository {
     });
 
     return deleteResult.count > 0;
-  } 
+  }
 
   async updateTaskDone(taskId: string, projectId: string, done: boolean) {
     const updateResult = await prisma.task.updateMany({
@@ -58,5 +58,4 @@ export default class PrismaTaskRepository {
       },
     });
   }
-
 }

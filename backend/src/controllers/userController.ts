@@ -1,208 +1,110 @@
 import { Context } from "koa";
-import { registerUser, getUserById, updateUser, updateUserPassword, deleteUser } from "../services/userService";
+import {
+  registerUser,
+  getUserById,
+  updateUser,
+  updateUserPassword,
+  deleteUser,
+} from "../services/userService";
 import type { UserRegister, UserUpdate } from "../types/User";
+import { BadRequestError, NotFoundError } from "../errors/AppError";
 
 export async function registerHandler(ctx: Context) {
-    const { name, lastname, age, email, password } = ctx.request.body as UserRegister;
+  const { name, lastname, age, email, password } = ctx.request.body as UserRegister;
 
-    const cleanName = name?.trim();
-    const cleanEmail = email?.trim();
-    const cleanPassword = password?.trim();
-    const cleanLastname = lastname && lastname.trim() !== "" ? lastname.trim() : undefined;
+  const cleanName = name?.trim();
+  const cleanEmail = email?.trim();
+  const cleanPassword = password?.trim();
+  const cleanLastname = lastname && lastname.trim() !== "" ? lastname.trim() : undefined;
 
-    // Basic validation
-    if (!cleanName || !cleanEmail || !cleanPassword) {
-        ctx.status = 400;
-        ctx.body = { message: "Missing required fields" };
-        return;
-    }
+  if (!cleanName || !cleanEmail || !cleanPassword) {
+    throw new BadRequestError("Missing required fields", "missing-fields");
+  }
 
-    // Validate age type
-    if (age !== undefined && typeof age !== "number") {
-        ctx.status = 400;
-        ctx.body = { message: "Age must be a number" };
-        return;
-    }
+  if (age !== undefined && typeof age !== "number") {
+    throw new BadRequestError("Age must be a number", "invalid-age");
+  }
 
-    try {
-        const newUser = await registerUser({
-            name: cleanName,
-            lastname: cleanLastname,
-            age,
-            email: cleanEmail,
-            password: cleanPassword,
-        });
+  const newUser = await registerUser({
+    name: cleanName,
+    lastname: cleanLastname,
+    age,
+    email: cleanEmail,
+    password: cleanPassword,
+  });
 
-        ctx.status = 201;
-        ctx.body = newUser;
-
-    } catch (err: any) {
-        if (err instanceof Error) {
-            ctx.status = 400;
-            ctx.body = { message: err.message };
-            return;
-        }
-
-        ctx.status = 500;
-        ctx.body = { message: "Internal server error" };
-    }
+  ctx.status = 201;
+  ctx.body = newUser;
 }
 
 export async function getCurrentUserHandler(ctx: Context) {
-    const userId = ctx.state.userId;
+  const user = await getUserById(ctx.state.userId);
 
-    if (!userId) {
-        ctx.status = 401;
-        ctx.body = { message: "Unauthorized" };
-        return;
-    }
+  if (!user) {
+    throw new NotFoundError("User not found", "user-not-found");
+  }
 
-    try {
-        const user = await getUserById(userId);
-
-        if (!user) {
-            ctx.status = 404;
-            ctx.body = { message: "User not found" };
-            return;
-        }
-
-        ctx.status = 200;
-        ctx.body = user;
-
-    } catch (err: any) {
-        ctx.status = 500;
-        ctx.body = { message: "Internal server error" };
-    }
+  ctx.body = user;
 }
 
 export async function updateCurrentUserHandler(ctx: Context) {
-    const userId = ctx.state.userId;
+  const body = ctx.request.body as Partial<UserUpdate>;
+  const { name, lastname, age, email } = body;
 
-    if (!userId) {
-        ctx.status = 401;
-        ctx.body = { message: "Unauthorized" };
-        return;
-    }
+  const cleanName = name?.trim();
+  const cleanEmail = email?.trim();
+  const hasLastname = Object.prototype.hasOwnProperty.call(body, "lastname");
+  const hasAge = Object.prototype.hasOwnProperty.call(body, "age");
 
-    const body = ctx.request.body as Partial<UserUpdate>;
-    const { name, lastname, age, email } = body;
+  if (name !== undefined && !cleanName) {
+    throw new BadRequestError("Name cannot be empty", "invalid-name");
+  }
 
-    const cleanName = name?.trim();
-    const cleanEmail = email?.trim();
-    const hasLastname = Object.prototype.hasOwnProperty.call(body, "lastname");
-    const hasAge = Object.prototype.hasOwnProperty.call(body, "age");
+  if (email !== undefined && !cleanEmail) {
+    throw new BadRequestError("Email cannot be empty", "invalid-email");
+  }
 
-    // Require non-empty name/email if provided
-    if (name !== undefined && !cleanName) {
-        ctx.status = 400;
-        ctx.body = { message: "Name cannot be empty" };
-        return;
-    }
+  if (lastname !== undefined && lastname !== null && typeof lastname !== "string") {
+    throw new BadRequestError("Lastname must be a string", "invalid-lastname");
+  }
 
-    if (email !== undefined && !cleanEmail) {
-        ctx.status = 400;
-        ctx.body = { message: "Email cannot be empty" };
-        return;
-    }
+  if (age !== undefined && age !== null && typeof age !== "number") {
+    throw new BadRequestError("Age must be a number", "invalid-age");
+  }
 
-    if (lastname !== undefined && lastname !== null && typeof lastname !== "string") {
-        ctx.status = 400;
-        ctx.body = { message: "Lastname must be a string" };
-        return;
-    }
+  const data: UserUpdate = {};
+  if (cleanName !== undefined) data.name = cleanName;
+  if (hasLastname) {
+    data.lastname = typeof lastname === "string" && lastname.trim() !== "" ? lastname.trim() : null;
+  }
+  if (hasAge) data.age = age === null ? null : age;
+  if (cleanEmail !== undefined) data.email = cleanEmail;
 
-    // Validate age type
-    if (age !== undefined && age !== null && typeof age !== "number") {
-        ctx.status = 400;
-        ctx.body = { message: "Age must be a number" };
-        return;
-    }
-
-    const data: UserUpdate = {};
-    if (cleanName !== undefined) data.name = cleanName;
-    if (hasLastname) {
-        if (typeof lastname === "string" && lastname.trim() !== "") {
-            data.lastname = lastname.trim();
-        } else {
-            data.lastname = null;
-        }
-    }
-    if (hasAge) data.age = age === null ? null : age;
-    if (cleanEmail !== undefined) data.email = cleanEmail;
-
-    try {
-        const updatedUser = await updateUser(userId, data);
-        ctx.status = 200;
-        ctx.body = updatedUser;
-    } catch (err: any) {
-
-        if (err instanceof Error) {
-            ctx.status = 400;
-            ctx.body = { message: err.message };
-            return;
-        }
-
-    ctx.status = 500;
-    ctx.body = { message: "Internal server error" };
-    }
+  ctx.body = await updateUser(ctx.state.userId, data);
 }
 
 export async function updatePasswordHandler(ctx: Context) {
-    const userId = ctx.state.userId;
+  const { currentPassword, newPassword } = ctx.request.body as {
+    currentPassword?: unknown;
+    newPassword?: unknown;
+  };
 
-    if (!userId) {
-        ctx.status = 401;
-        ctx.body = { message: "Unauthorized" };
-        return;
-    }
+  if (typeof currentPassword !== "string" || typeof newPassword !== "string") {
+    throw new BadRequestError("Passwords must be strings", "invalid-password");
+  }
 
-    const { currentPassword, newPassword } = ctx.request.body as { currentPassword: string; newPassword: string };
+  const cleanCurrentPassword = currentPassword.trim();
+  const cleanNewPassword = newPassword.trim();
 
-    if(typeof currentPassword !== "string" || typeof newPassword !== "string") {
-        ctx.status = 400;
-        ctx.body = { message: "Passwords must be strings" };
-        return;
-    }
+  if (!cleanCurrentPassword || !cleanNewPassword) {
+    throw new BadRequestError("Missing required fields", "missing-fields");
+  }
 
-    const cleanCurrentPassword = currentPassword.trim();
-    const cleanNewPassword = newPassword?.trim();
-
-    if (!cleanCurrentPassword || !cleanNewPassword) {
-        ctx.status = 400;
-        ctx.body = { message: "Missing required fields" };
-        return;
-    }
-
-
-    try {
-        await updateUserPassword(userId, cleanCurrentPassword, cleanNewPassword);
-        ctx.status = 200;
-        ctx.body = { message: "Password updated successfully" };
-    } catch (err: any) {
-        if (err instanceof Error) {
-            ctx.status = 400;
-            ctx.body = { message: err.message };
-            return;
-        }
-        ctx.status = 500;
-        ctx.body = { message: "Internal server error" };
-    } 
-}  
+  await updateUserPassword(ctx.state.userId, cleanCurrentPassword, cleanNewPassword);
+  ctx.body = { message: "Password updated successfully" };
+}
 
 export async function deleteCurrentUserHandler(ctx: Context) {
-    const userId = ctx.state.userId;
-
-    if (!userId) {
-        ctx.status = 401;
-        ctx.body = { message: "Unauthorized" };
-        return;
-    }
-
-    try {
-        await deleteUser(userId);
-        ctx.status = 204;
-    } catch (err: any) {
-        ctx.status = 500;
-        ctx.body = { message: "Internal server error" };
-    }
+  await deleteUser(ctx.state.userId);
+  ctx.status = 204;
 }

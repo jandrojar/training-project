@@ -20,8 +20,8 @@
 
       <button
         class="text-gray-400 hover:text-gray-700 cursor-pointer px-2 -mr-2"
-        @click="remove(t.id)"
         aria-label="Dismiss notification"
+        @click="remove(t.id)"
       >
         ×
       </button>
@@ -30,16 +30,16 @@
 </template>
 
 <script setup lang="ts">
-import { useToast } from "../composables/useToast"
-import type { ToastType } from "../types/types"
+import { useToast } from "../composables/useToast";
+import type { ToastType } from "../types/types";
 
-const { toasts, remove } = useToast()
+const { toasts, remove } = useToast();
 
 function toastBorderClass(type: ToastType) {
-  if (type === "success") return "border-green-200 bg-green-100"
-  if (type === "error") return "border-red-200 bg-red-100"
-  if (type === "warning") return "border-yellow-200 bg-yellow-100"
-  return "border-blue-200 bg-blue-100"
+  if (type === "success") return "border-green-200 bg-green-100";
+  if (type === "error") return "border-red-200 bg-red-100";
+  if (type === "warning") return "border-yellow-200 bg-yellow-100";
+  return "border-blue-200 bg-blue-100";
 }
 </script>
 

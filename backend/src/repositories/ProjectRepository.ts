@@ -1,6 +1,5 @@
-import prisma from "../services/prisma";
+import prisma from "../lib/prisma";
 import { ProjectPayload, ProjectStatus, ProjectPriority } from "../types/Project";
-
 
 export default class PrismaProjectRepository {
   async createProject(data: { project: ProjectPayload; userId: string }) {
@@ -8,16 +7,9 @@ export default class PrismaProjectRepository {
 
     return prisma.project.create({
       data: {
-        ...project,   
+        ...project,
         userId,
-        },
-    });
-  }
-
-  // Returns all projects that belong to a specific user
-  async getProjectsByUser(userId: string) {
-    return prisma.project.findMany({
-      where: { userId },
+      },
     });
   }
 
@@ -50,23 +42,24 @@ export default class PrismaProjectRepository {
     return deleteResult.count > 0;
   }
 
-  async getFilteredProjects(userId: string, filters: {
-  search?: string;
-  status?: ProjectStatus;
-  priority?: ProjectPriority;
-}) {
-  return prisma.project.findMany({
-    where: {
-      userId,
-      title: filters.search
-        ? { contains: filters.search, mode: "insensitive" }
-        : undefined,
-      status: filters.status || undefined,
-      priority: filters.priority || undefined,
+  async getFilteredProjects(
+    userId: string,
+    filters: {
+      search?: string;
+      status?: ProjectStatus;
+      priority?: ProjectPriority;
     },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
-}
+  ) {
+    return prisma.project.findMany({
+      where: {
+        userId,
+        title: filters.search ? { contains: filters.search, mode: "insensitive" } : undefined,
+        status: filters.status || undefined,
+        priority: filters.priority || undefined,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+  }
 }

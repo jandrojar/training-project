@@ -1,122 +1,59 @@
 import { Context } from "koa";
 import {
   createProject,
-  getProjectsForUser,
   getProjectForUser,
   updateProjectForUser,
   deleteProjectForUser,
   getFilteredProjects,
 } from "../services/projectService";
 
-import {
-  ProjectPayload,
-  ProjectStatus,
-  ProjectPriority,
-} from "../types/Project";
-
+import { ProjectPayload, ProjectStatus, ProjectPriority } from "../types/Project";
+import { BadRequestError, NotFoundError } from "../errors/AppError";
 
 export async function createProjectHandler(ctx: Context) {
   const userId = ctx.state.userId;
   const body = ctx.request.body as Partial<ProjectPayload>;
 
-  if (!body.title) {
-    ctx.status = 400;
-    ctx.body = { message: "Title is required" };
-    return;
-  }
-
-  if (typeof body.title !== "string") {
-    ctx.status = 400;
-    ctx.body = { message: "Title must be a string" };
-    return;
-  }
-
-  const cleanTitle = body.title.trim();
-  if (!cleanTitle) {
-    ctx.status = 400;
-    ctx.body = { message: "Title cannot be empty" };
-    return;
+  if (typeof body.title !== "string" || !body.title.trim()) {
+    throw new BadRequestError("Title is required", "invalid-title");
   }
 
   if (body.tags !== undefined && !Array.isArray(body.tags)) {
-    ctx.status = 400;
-    ctx.body = { message: "Tags must be an array" };
-    return;
+    throw new BadRequestError("Tags must be an array", "invalid-tags");
   }
 
   const cleanDescription =
-    typeof body.description === "string"
-      ? body.description.trim()
-      : body.description;
+    typeof body.description === "string" ? body.description.trim() : body.description;
 
-  try {
-    const project = await createProject(userId, {
-      ...body,
-      title: cleanTitle,
-      description: cleanDescription,
-    });
+  const project = await createProject(userId, {
+    ...body,
+    title: body.title.trim(),
+    description: cleanDescription,
+  });
 
-    ctx.status = 201;
-    ctx.body = project;
-  } catch (err) {
-    ctx.status = 400;
-    ctx.body = { message: (err as Error).message };
-  }
+  ctx.status = 201;
+  ctx.body = project;
 }
-
-
-export async function getProjectsHandler(ctx: Context) {
-  const userId = ctx.state.userId;
-
-  const projects = await getProjectsForUser(userId);
-  ctx.status = 200;
-  ctx.body = projects;
-}
-
 
 export async function getProjectHandler(ctx: Context) {
-  const userId = ctx.state.userId;
-  const { id } = ctx.params;
+  const project = await getProjectForUser(ctx.params.id, ctx.state.userId);
 
-  try {
-    const project = await getProjectForUser(id, userId);
-
-    if (!project) {
-      ctx.status = 404;
-      ctx.body = { message: "Project not found" };
-      return;
-    }
-
-    ctx.status = 200;
-    ctx.body = project;
-  } catch (err) {
-    ctx.status = 404;
-    ctx.body = { message: (err as Error).message };
+  if (!project) {
+    throw new NotFoundError("Project not found", "project-not-found");
   }
+
+  ctx.body = project;
 }
 
-
 export async function updateProjectHandler(ctx: Context) {
-  const userId = ctx.state.userId;
   const { id } = ctx.params;
-
   const payload = ctx.request.body as Partial<ProjectPayload>;
 
   if (payload.title !== undefined) {
-    if (typeof payload.title !== "string") {
-      ctx.status = 400;
-      ctx.body = { message: "Title must be a string" };
-      return;
+    if (typeof payload.title !== "string" || !payload.title.trim()) {
+      throw new BadRequestError("Title must be a non-empty string", "invalid-title");
     }
-
-    const cleanTitle = payload.title.trim();
-    if (!cleanTitle) {
-      ctx.status = 400;
-      ctx.body = { message: "Title cannot be empty" };
-      return;
-    }
-
-    payload.title = cleanTitle;
+    payload.title = payload.title.trim();
   }
 
   if (payload.description !== undefined && typeof payload.description === "string") {
@@ -124,53 +61,23 @@ export async function updateProjectHandler(ctx: Context) {
   }
 
   if (payload.tags !== undefined && !Array.isArray(payload.tags)) {
-    ctx.status = 400;
-    ctx.body = { message: "Tags must be an array" };
-    return;
+    throw new BadRequestError("Tags must be an array", "invalid-tags");
   }
 
-  try {
-    const updated = await updateProjectForUser(id, userId, payload);
-
-    ctx.status = 200;
-    ctx.body = updated;
-  } catch (err) {
-    ctx.status = 400;
-    ctx.body = { message: (err as Error).message };
-  }
+  ctx.body = await updateProjectForUser(id, ctx.state.userId, payload);
 }
 
 export async function deleteProjectHandler(ctx: Context) {
-  const userId = ctx.state.userId;
-  const { id } = ctx.params;
-
-  try {
-    await deleteProjectForUser(id, userId);
-    ctx.status = 200;
-    ctx.body = { success: true };
-  } catch (err) {
-    ctx.status = 400;
-    ctx.body = { message: (err as Error).message };
-  }
+  await deleteProjectForUser(ctx.params.id, ctx.state.userId);
+  ctx.body = { success: true };
 }
 
-
-
 export async function getFilteredProjectsHandler(ctx: Context) {
-  const userId = ctx.state.userId;
   const { search, status, priority } = ctx.query;
 
-  try {
-    const projects = await getFilteredProjects(userId, {
-      search: search as string,
-      status: status as ProjectStatus,
-      priority: priority as ProjectPriority,
-    });
-
-    ctx.status = 200;
-    ctx.body = projects;
-  } catch (err) {
-    ctx.status = 400;
-    ctx.body = { message: (err as Error).message };
-  }
+  ctx.body = await getFilteredProjects(ctx.state.userId, {
+    search: search as string,
+    status: status as ProjectStatus,
+    priority: priority as ProjectPriority,
+  });
 }

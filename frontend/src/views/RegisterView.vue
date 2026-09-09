@@ -3,9 +3,9 @@
     <div class="w-full max-w-md p-6 bg-white rounded-xl shadow">
       <h1 class="text-3xl font-bold mb-6 text-center">Create your account</h1>
 
-      <form @submit.prevent="handleRegister"  class="space-y-4">
+      <form class="space-y-4" @submit.prevent="handleRegister">
         <!-- First name -->
-        <input 
+        <input
           v-model="user.name"
           type="text"
           placeholder="First name"
@@ -30,7 +30,7 @@
         />
 
         <!-- Email -->
-        <input 
+        <input
           v-model="user.email"
           type="email"
           placeholder="Email"
@@ -39,7 +39,7 @@
         />
 
         <!-- Password -->
-        <input 
+        <input
           v-model="user.password"
           type="password"
           placeholder="Password"
@@ -58,42 +58,38 @@
 
       <p class="text-center text-sm mt-4">
         Already have an account?
-        <router-link to="/login" class="text-blue-600 hover:underline">
-          Login here
-        </router-link>
+        <router-link to="/login" class="text-blue-600 hover:underline"> Login here </router-link>
       </p>
     </div>
   </div>
 </template>
 <script setup lang="ts">
-import { reactive } from 'vue';
-import type { IUserRegister } from '../types/types';
-import { useRouter } from 'vue-router';
-import { register } from '../services/authService'
-import { useToast } from '../composables/useToast'
-import { isHandledError } from '../helpers/isHandledError'
+import { reactive } from "vue";
+import type { IUserRegister } from "../types/types";
+import { useRouter } from "vue-router";
+import { register } from "../services/authService";
+import { useToast } from "../composables/useToast";
+import { isHandledError } from "../helpers/isHandledError";
 
 const router = useRouter();
 const user = reactive<IUserRegister>({
-  name: '',
-  lastname: '',
+  name: "",
+  lastname: "",
   age: undefined,
-  email: '',
-  password: ''
+  email: "",
+  password: "",
 });
 
 async function handleRegister() {
-  try{
-    await register(user)
-    useToast().success('Account created. Please log in.')
-    router.push('/login')
+  try {
+    await register(user);
+    useToast().success("Account created. Please log in.");
+    router.push("/login");
   } catch (error: unknown) {
     if (!isHandledError(error)) {
-      const message = error instanceof Error ? error.message : "Register failed"
-      useToast().error(message)
+      const message = error instanceof Error ? error.message : "Register failed";
+      useToast().error(message);
     }
   }
 }
-
-
 </script>

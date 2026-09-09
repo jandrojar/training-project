@@ -1,37 +1,26 @@
-import prisma from "../services/prisma";
+import prisma from "../lib/prisma";
 
 export default class SessionPrismaRepository {
+  async createSession(userId: string, expiresAt: Date) {
+    return prisma.session.create({ data: { userId, expiresAt } });
+  }
 
-    async createSession(userId: string, expiresAt: Date) {
-        return prisma.session.create({data: {userId, expiresAt}
-        });
-    }
+  async findSessionById(id: string) {
+    return prisma.session.findUnique({
+      where: { id },
+    });
+  }
 
-    async findSessionById(id: string) {
-        return prisma.session.findUnique({
-            where: { id },
-          });
-    }
+  async deleteSession(id: string) {
+    return prisma.session.delete({
+      where: { id },
+    });
+  }
 
-    async deleteSession(id:string) {
-        return prisma.session.delete({
-            where:{id},
-          });
-    }
-
-    async deleteSessionByUser(userId:string){
-        return prisma.session.deleteMany({
-            where:{userId},
-        });
-        
-    }    
-
-    async updateSessionExpiry(id:string, newExpiresAt:Date){    
-        return prisma.session.update({
-            where:{id},
-            data:{expiresAt:newExpiresAt},
-        });
-    }
-
-
+  async updateSessionExpiry(id: string, newExpiresAt: Date) {
+    return prisma.session.update({
+      where: { id },
+      data: { expiresAt: newExpiresAt },
+    });
+  }
 }

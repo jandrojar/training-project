@@ -1,6 +1,8 @@
 import TaskRepository from "../repositories/TaskRepository";
 import ProjectRepository from "../repositories/ProjectRepository";
 import { TaskPayload, TaskDTO } from "../types/Task";
+import { BadRequestError, NotFoundError } from "../errors/AppError";
+import { normalizeDeadline } from "../lib/deadline";
 
 const taskRepo = new TaskRepository();
 const projectRepo = new ProjectRepository();
@@ -28,29 +30,33 @@ function toTaskDTO(task: {
   };
 }
 
-/**
- * Create Task
- */
+/** Load a project the user owns, or throw 404. */
+async function assertProjectOwned(projectId: string, userId: string) {
+  const project = await projectRepo.getProjectByIdForUser(projectId, userId);
+  if (!project) {
+    throw new NotFoundError("Project not found or access denied", "project-not-found");
+  }
+  return project;
+}
+
+function assertValidTitle(title?: string) {
+  if (title !== undefined && title.trim().length < 3) {
+    throw new BadRequestError("Title must be at least 3 characters long", "invalid-title");
+  }
+}
+
 export async function createTask(
   projectId: string,
   userId: string,
-  taskData: TaskPayload
+  taskData: TaskPayload,
 ): Promise<TaskDTO> {
+  await assertProjectOwned(projectId, userId);
+  assertValidTitle(taskData.title);
 
-  // Ensure project belongs to user
-  const project = await projectRepo.getProjectByIdForUser(projectId, userId);
-  if (!project) throw new Error("Project not found or access denied");
-
-  // Business rules
-  if (!taskData.title || taskData.title.trim().length < 3) {
-    throw new Error("Title must be at least 3 characters long");
+  const normalizedData: TaskPayload = { ...taskData };
+  if (taskData.deadline !== undefined) {
+    normalizedData.deadline = normalizeDeadline(taskData.deadline);
   }
-
-  // Normalize date
-  const normalizedData: TaskPayload =
-    taskData.deadline
-      ? { ...taskData, deadline: new Date(taskData.deadline) }
-      : taskData;
 
   const task = await taskRepo.createTask({
     projectId,
@@ -60,105 +66,85 @@ export async function createTask(
   return toTaskDTO(task);
 }
 
-/**
- * Get all tasks for project
- */
-export async function getTasksForProject(
-  projectId: string,
-  userId: string
-): Promise<TaskDTO[]> {
-
-  const project = await projectRepo.getProjectByIdForUser(projectId, userId);
-  if (!project) throw new Error("Project not found or access denied");
+export async function getTasksForProject(projectId: string, userId: string): Promise<TaskDTO[]> {
+  await assertProjectOwned(projectId, userId);
 
   const tasks = await taskRepo.getTasksByProject(projectId);
   return tasks.map(toTaskDTO);
 }
 
-/**
- * Get single task
- */
 export async function getTaskForUser(
   taskId: string,
   projectId: string,
-  userId: string
+  userId: string,
 ): Promise<TaskDTO> {
-
-  const project = await projectRepo.getProjectByIdForUser(projectId, userId);
-  if (!project) throw new Error("Project not found or access denied");
+  await assertProjectOwned(projectId, userId);
 
   const task = await taskRepo.getTaskById(taskId, projectId);
-  if (!task) throw new Error("Task not found");
+  if (!task) {
+    throw new NotFoundError("Task not found", "task-not-found");
+  }
 
   return toTaskDTO(task);
 }
 
-/**
- * Update task
- */
 export async function updateTaskForUser(
   taskId: string,
   projectId: string,
   userId: string,
-  data: Partial<TaskPayload>
+  data: Partial<TaskPayload>,
 ): Promise<TaskDTO> {
-
-  const project = await projectRepo.getProjectByIdForUser(projectId, userId);
-  if (!project) throw new Error("Project not found or access denied");
+  await assertProjectOwned(projectId, userId);
 
   const existing = await taskRepo.getTaskById(taskId, projectId);
-  if (!existing) throw new Error("Task not found");
-
-  if (data.title && data.title.trim().length < 3) {
-    throw new Error("Title must be at least three characters long");
+  if (!existing) {
+    throw new NotFoundError("Task not found", "task-not-found");
   }
 
+  assertValidTitle(data.title);
+
   if (data.deadline !== undefined) {
-    const parsed = new Date(data.deadline);
-    if (isNaN(parsed.getTime())) throw new Error("Invalid deadline date");
-    data.deadline = parsed;
+    data.deadline = normalizeDeadline(data.deadline);
   }
 
   const updated = await taskRepo.updateTask(taskId, projectId, data);
-  if (!updated) throw new Error("Task not found or access denied");
+  if (!updated) {
+    throw new NotFoundError("Task not found", "task-not-found");
+  }
 
   return toTaskDTO(updated);
 }
 
-/**
- * Delete task
- */
 export async function deleteTaskForUser(
   taskId: string,
   projectId: string,
-  userId: string
+  userId: string,
 ): Promise<void> {
-
-  const project = await projectRepo.getProjectByIdForUser(projectId, userId);
-  if (!project) throw new Error("Project not found or access denied");
+  await assertProjectOwned(projectId, userId);
 
   const deleted = await taskRepo.deleteTask(taskId, projectId);
-  if (!deleted) throw new Error("Task not found or access denied");
+  if (!deleted) {
+    throw new NotFoundError("Task not found", "task-not-found");
+  }
 }
 
-/**
- * Update only the `done` field
- */
 export async function updateTaskDoneForUser(
   taskId: string,
   projectId: string,
   userId: string,
-  done: boolean
+  done: boolean,
 ): Promise<TaskDTO> {
-
-  const project = await projectRepo.getProjectByIdForUser(projectId, userId);
-  if (!project) throw new Error("Project not found or access denied");
+  await assertProjectOwned(projectId, userId);
 
   const existing = await taskRepo.getTaskById(taskId, projectId);
-  if (!existing) throw new Error("Task not found");
+  if (!existing) {
+    throw new NotFoundError("Task not found", "task-not-found");
+  }
 
   const updated = await taskRepo.updateTaskDone(taskId, projectId, done);
-  if (!updated) throw new Error("Task not found or access denied");
+  if (!updated) {
+    throw new NotFoundError("Task not found", "task-not-found");
+  }
 
   return toTaskDTO(updated);
 }
