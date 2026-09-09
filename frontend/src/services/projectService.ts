@@ -1,17 +1,8 @@
 import { api } from "./api";
 import type { IProject, IProjectPayload, ProjectPriority, ProjectStatus } from "../types/types";
+import { normalizePayload } from "../helpers/normalizePayload";
 
 // Errors are normalized in the axios interceptor.
-
-const normalizePayload = (payload: Partial<IProjectPayload>) => {
-  const { deadline, ...rest } = payload;
-  return {
-    ...rest,
-    ...(deadline !== undefined && {
-      deadline: deadline instanceof Date ? deadline.toISOString() : deadline,
-    }),
-  };
-};
 
 export async function getProjects(filters?: {
   search?: string;

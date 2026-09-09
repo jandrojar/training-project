@@ -1,17 +1,8 @@
 import { api } from "./api";
 import type { ITask, ITaskPayload } from "../types/types";
+import { normalizePayload } from "../helpers/normalizePayload";
 
 // Errors are normalized in the axios interceptor.
-
-const normalizePayload = (payload: Partial<ITaskPayload>) => {
-  const { deadline, ...rest } = payload;
-  return {
-    ...rest,
-    ...(deadline !== undefined && {
-      deadline: deadline instanceof Date ? deadline.toISOString() : deadline,
-    }),
-  };
-};
 
 export async function getTasks(projectId: string): Promise<ITask[]> {
   const response = await api.get(`/projects/${projectId}/tasks`);
