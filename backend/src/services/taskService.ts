@@ -2,6 +2,7 @@ import TaskRepository from "../repositories/TaskRepository";
 import ProjectRepository from "../repositories/ProjectRepository";
 import { TaskPayload, TaskDTO } from "../types/Task";
 import { BadRequestError, NotFoundError } from "../errors/AppError";
+import { normalizeDeadline } from "../lib/deadline";
 
 const taskRepo = new TaskRepository();
 const projectRepo = new ProjectRepository();
@@ -44,14 +45,6 @@ function assertValidTitle(title?: string) {
   }
 }
 
-function parseDeadline(deadline: string | Date): Date {
-  const date = new Date(deadline);
-  if (isNaN(date.getTime())) {
-    throw new BadRequestError("Invalid deadline date", "invalid-deadline");
-  }
-  return date;
-}
-
 export async function createTask(
   projectId: string,
   userId: string,
@@ -60,9 +53,10 @@ export async function createTask(
   await assertProjectOwned(projectId, userId);
   assertValidTitle(taskData.title);
 
-  const normalizedData: TaskPayload = taskData.deadline
-    ? { ...taskData, deadline: parseDeadline(taskData.deadline) }
-    : taskData;
+  const normalizedData: TaskPayload = { ...taskData };
+  if (taskData.deadline !== undefined) {
+    normalizedData.deadline = normalizeDeadline(taskData.deadline);
+  }
 
   const task = await taskRepo.createTask({
     projectId,
@@ -110,7 +104,7 @@ export async function updateTaskForUser(
   assertValidTitle(data.title);
 
   if (data.deadline !== undefined) {
-    data.deadline = parseDeadline(data.deadline);
+    data.deadline = normalizeDeadline(data.deadline);
   }
 
   const updated = await taskRepo.updateTask(taskId, projectId, data);

@@ -46,7 +46,8 @@ export interface IProjectPayload {
   status?: ProjectStatus;
   priority?: ProjectPriority;
   tags?: string[];
-  deadline?: string | Date;
+  // "" / null clears the deadline; undefined leaves it unchanged
+  deadline?: string | Date | null;
 }
 
 export interface IProject {
@@ -64,7 +65,8 @@ export interface IProject {
 export interface ITaskPayload {
   title: string;
   description?: string;
-  deadline?: string | Date;
+  // "" / null clears the deadline; undefined leaves it unchanged
+  deadline?: string | Date | null;
 }
 
 export interface ITask {
