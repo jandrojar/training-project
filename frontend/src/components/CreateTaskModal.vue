@@ -159,7 +159,8 @@ async function handleSubmit() {
     const payload: ITaskPayload = {
       title: form.value.title.trim(),
       description: form.value.description?.trim() || undefined,
-      deadline: form.value.deadline || undefined,
+      // null (not undefined) so an emptied field clears the deadline on edit
+      deadline: form.value.deadline || null,
     };
 
     if (isEdit.value && props.task) {

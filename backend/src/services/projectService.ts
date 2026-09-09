@@ -8,6 +8,7 @@ import {
   PROJECT_PRIORITIES,
 } from "../types/Project";
 import { BadRequestError, NotFoundError } from "../errors/AppError";
+import { normalizeDeadline } from "../lib/deadline";
 
 const projectRepo = new ProjectRepository();
 
@@ -46,14 +47,6 @@ function assertValidPriority(priority?: ProjectPriority) {
   }
 }
 
-function parseDeadline(deadline: string | Date): Date {
-  const date = new Date(deadline);
-  if (isNaN(date.getTime())) {
-    throw new BadRequestError("Invalid deadline date", "invalid-deadline");
-  }
-  return date;
-}
-
 export async function createProject(
   userId: string,
   projectData: ProjectPayload,
@@ -73,7 +66,7 @@ export async function createProject(
   };
 
   if (projectData.deadline !== undefined) {
-    dataToSave.deadline = parseDeadline(projectData.deadline);
+    dataToSave.deadline = normalizeDeadline(projectData.deadline);
   }
 
   const project = await projectRepo.createProject({
@@ -110,7 +103,7 @@ export async function updateProjectForUser(
   assertValidPriority(data.priority);
 
   if (data.deadline !== undefined) {
-    data.deadline = parseDeadline(data.deadline);
+    data.deadline = normalizeDeadline(data.deadline);
   }
 
   const updatedProject = await projectRepo.updateProject(projectId, userId, data);

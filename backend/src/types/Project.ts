@@ -12,7 +12,8 @@ export interface ProjectPayload {
   status?: ProjectStatus;
   priority?: ProjectPriority;
   tags?: string[];
-  deadline?: string | Date;
+  // `null` / "" from the client means "clear the deadline"
+  deadline?: string | Date | null;
 }
 
 export interface ProjectDTO {

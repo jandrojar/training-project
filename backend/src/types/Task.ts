@@ -1,7 +1,8 @@
 export interface TaskPayload {
   title: string;
   description?: string;
-  deadline?: string | Date;
+  // `null` / "" from the client means "clear the deadline"
+  deadline?: string | Date | null;
 }
 
 export interface TaskDTO {
