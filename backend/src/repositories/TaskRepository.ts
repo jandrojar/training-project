@@ -1,4 +1,4 @@
-import prisma from "../services/prisma";
+import prisma from "../lib/prisma";
 import { TaskPayload } from "../types/Task";
 
 export default class PrismaTaskRepository {

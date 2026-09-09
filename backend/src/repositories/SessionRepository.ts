@@ -1,4 +1,4 @@
-import prisma from "../services/prisma";
+import prisma from "../lib/prisma";
 
 export default class SessionPrismaRepository {
   async createSession(userId: string, expiresAt: Date) {
@@ -14,12 +14,6 @@ export default class SessionPrismaRepository {
   async deleteSession(id: string) {
     return prisma.session.delete({
       where: { id },
-    });
-  }
-
-  async deleteSessionByUser(userId: string) {
-    return prisma.session.deleteMany({
-      where: { userId },
     });
   }
 

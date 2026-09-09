@@ -1,11 +1,7 @@
-import prisma from "../services/prisma";
+import prisma from "../lib/prisma";
 import type { UserCreateInput, UserUpdateInput, UserPasswordUpdateInput } from "../types/User";
 
 export default class UserPrismaRepository {
-  async findAll() {
-    return prisma.user.findMany();
-  }
-
   async findById(id: string) {
     return prisma.user.findUnique({
       where: { id },

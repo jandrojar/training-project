@@ -1,12 +1,15 @@
 import ProjectRepository from "../repositories/ProjectRepository";
-import { ProjectPayload, ProjectDTO, ProjectPriority, ProjectStatus } from "../types/Project";
+import {
+  ProjectPayload,
+  ProjectDTO,
+  ProjectPriority,
+  ProjectStatus,
+  PROJECT_STATUSES,
+  PROJECT_PRIORITIES,
+} from "../types/Project";
 import { BadRequestError, NotFoundError } from "../errors/AppError";
 
 const projectRepo = new ProjectRepository();
-
-const VALID_STATUSES: ProjectStatus[] = ["PLANNED", "IN_PROGRESS", "COMPLETED", "ON_HOLD"];
-
-const VALID_PRIORITIES: ProjectPriority[] = ["LOW", "MEDIUM", "HIGH"];
 
 // Mapper → converts a Prisma project object to a ProjectDTO
 const toProjectDTO = (project: {
@@ -32,13 +35,13 @@ const toProjectDTO = (project: {
 });
 
 function assertValidStatus(status?: ProjectStatus) {
-  if (status && !VALID_STATUSES.includes(status)) {
+  if (status && !PROJECT_STATUSES.includes(status)) {
     throw new BadRequestError("Invalid status", "invalid-status");
   }
 }
 
 function assertValidPriority(priority?: ProjectPriority) {
-  if (priority && !VALID_PRIORITIES.includes(priority)) {
+  if (priority && !PROJECT_PRIORITIES.includes(priority)) {
     throw new BadRequestError("Invalid priority", "invalid-priority");
   }
 }
@@ -79,11 +82,6 @@ export async function createProject(
   });
 
   return toProjectDTO(project);
-}
-
-export async function getProjectsForUser(userId: string): Promise<ProjectDTO[]> {
-  const projectsByUser = await projectRepo.getProjectsByUser(userId);
-  return projectsByUser.map(toProjectDTO);
 }
 
 export async function getProjectForUser(
